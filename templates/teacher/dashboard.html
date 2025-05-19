@@ -1,0 +1,10 @@
+{% extends 'account/base.html' %}
+{% block title %}Teacher Dashboard - Course Craft{% endblock %}
+{% block content %}
+    <div class="bg-white p-6 rounded shadow">
+        <h2 class="text-2xl font-bold mb-4">Teacher Dashboard</h2>
+        <p>Welcome, {{ user.full_name }}!</p>
+        <p>This is your teacher dashboard. You can manage courses, assignments, and students here.</p>
+        <!-- Add teacher-specific functionality here -->
+    </div>
+{% endblock %}

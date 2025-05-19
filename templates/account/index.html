@@ -1,0 +1,14 @@
+{% extends 'account/base.html' %}
+{% block title %}Home - Course Craft{% endblock %}
+{% block content %}
+    <div class="text-center">
+        <h1 class="text-3xl font-bold mb-4">Welcome to Course Craft</h1>
+        <p class="text-lg mb-6">Your platform for learning and teaching, inspired by Google Classroom.</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="bg-blue-600 text-white px-4 py-2 rounded">Go to Dashboard</a>
+        {% else %}
+            <a href="{% url 'login' %}" class="bg-blue-600 text-white px-4 py-2 rounded mr-2">Login</a>
+            <a href="{% url 'register' %}" class="bg-green-600 text-white px-4 py-2 rounded">Register</a>
+        {% endif %}
+    </div>
+{% endblock %}
