@@ -1,0 +1,116 @@
+{% extends 'teacher/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary fw-bold">Create New Class</h2>
+    <form method="post" class="p-4 bg-white rounded shadow-sm">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="class_name" class="form-label fw-semibold">Class Name</label>
+            <input type="text" class="form-control" id="class_name" name="class_name" placeholder="Enter class name" required>
+        </div>
+        <div class="mb-3">
+            <label for="subject" class="form-label fw-semibold">Subject</label>
+            <input type="text" class="form-control" id="subject" name="subject" placeholder="Enter subject" required>
+        </div>
+        <div class="mb-3">
+            <label for="class_key" class="form-label fw-semibold">Class Key</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="class_key" name="class_key" readonly value="">
+                <button class="btn btn-outline-primary" type="button" onclick="generateClassKey()">Generate Key</button>
+            </div>
+            <small class="form-text text-muted">Click to generate a 10-digit unique class key.</small>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label fw-semibold">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="5" placeholder="Describe the class"></textarea>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Class</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-control, .form-control:focus {
+        border-color: var(--primary-blue);
+        box-shadow: none;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--secondary-blue);
+        box-shadow: 0 0 0 0.2rem rgba(56, 189, 248, 0.25);
+    }
+
+    .form-label {
+        color: var(--text-color);
+    }
+
+    .btn-primary, .btn-outline-primary {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover, .btn-outline-primary:hover {
+        background-color: var(--secondary-blue);
+        border-color: var(--secondary-blue);
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary-blue);
+        background-color: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        color: white;
+    }
+
+    .btn-outline-secondary {
+        border-color: var(--text-color);
+        color: var(--text-color);
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: var(--light-blue);
+        border-color: var(--secondary-blue);
+        color: var(--primary-blue);
+    }
+
+    .shadow-sm {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .form-text {
+        color: var(--text-color);
+    }
+
+    @media (max-width: 576px) {
+        .d-flex {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    function generateClassKey() {
+        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let key = '';
+        for (let i = 0; i < 10; i++) {
+            key += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('class_key').value = key;
+    }
+
+    // Generate key on page load
+    window.onload = generateClassKey;
+</script>
+{% endblock %}

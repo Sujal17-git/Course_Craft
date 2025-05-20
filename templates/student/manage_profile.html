@@ -1,0 +1,183 @@
+{% extends 'teacher/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-3 mx-auto" style="max-width: 700px;">
+        <div class="card-header bg-primary text-white rounded-top-3 p-4">
+            <h2 class="mb-0 fw-bold">Manage Profile</h2>
+        </div>
+        <div class="card-body p-5">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="row g-4">
+                    {% for field in form %}
+                        <div class="col-12">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-dark mb-2">{{ field.label }}</label>
+                            <div class="input-group">
+                                {% if field.name == 'email' %}
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-envelope text-primary"></i></span>
+                                    <input type="email" class="form-control border-start-0" id="{{ field.id_for_label }}" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}" placeholder="Enter your email" {% if field.field.required %}required{% endif %}>
+                                {% elif field.name == 'username' %}
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-primary"></i></span>
+                                    <input type="text" class="form-control border-start-0" id="{{ field.id_for_label }}" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}" placeholder="Enter your username" {% if field.field.required %}required{% endif %}>
+                                {% elif field.name == 'first_name' %}
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-id-card text-primary"></i></span>
+                                    <input type="text" class="form-control border-start-0" id="{{ field.id_for_label }}" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}" placeholder="Enter your first name">
+                                {% elif field.name == 'last_name' %}
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-id-card text-primary"></i></span>
+                                    <input type="text" class="form-control border-start-0" id="{{ field.id_for_label }}" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}" placeholder="Enter your last name">
+                                {% elif field.name == 'date_of_birth' %}
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-calendar-alt text-primary"></i></span>
+                                    <input type="date" class="form-control border-start-0 date-picker" id="{{ field.id_for_label }}" name="{{ field.name }}" value="{{ field.value|date:'Y-m-d'|default_if_none:'' }}" placeholder="Select your date of birth">
+                                {% else %}
+                                    <input type="text" class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}" placeholder="Enter {{ field.label|lower }}" {% if field.field.required %}required{% endif %}>
+                                {% endif %}
+                            </div>
+                            {% if field.help_text %}
+                                <small class="form-text text-muted d-block mt-1">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="text-danger mt-1 small">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="d-flex gap-3 mt-5 justify-content-between align-items-center flex-wrap">
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button type="submit" class="btn btn-primary px-5 py-2 fw-semibold">Save Changes</button>
+                        <button type="button" class="btn btn-outline-primary px-5 py-2 fw-semibold" onclick="window.location.href='#'">Forgot Password</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .card-header {
+        background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue)) !important;
+        border-bottom: none;
+    }
+
+    .form-control {
+        border: 1px solid #d1d5db;
+        border-radius: 0 8px 8px 0;
+        padding: 12px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        height: 48px;
+        background: #fff;
+    }
+
+    .form-control:focus {
+        border-color: var(--secondary-blue);
+        box-shadow: 0 0 0 0.2rem rgba(56, 189, 248, 0.25);
+        outline: none;
+    }
+
+    .date-picker {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7' width='18px' height='18px'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 12px center;
+        background-size: 18px;
+    }
+
+    .date-picker::-webkit-calendar-picker-indicator {
+        opacity: 0;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+    }
+
+    .input-group-text {
+        border: 1px solid #d1d5db;
+        border-radius: 8px 0 0 8px;
+        background: #f9fafb;
+        color: var(--primary-blue);
+        padding:/ 0 12px;
+        display: flex;
+        align-items: center;
+        height: 48px;
+        transition: background 0.3s ease;
+    }
+
+    .input-group-text:hover {
+        background: #e0f2fe;
+    }
+
+    .form-label {
+        color: var(--text-color);
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+        letter-spacing: 0.02em;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--secondary-blue);
+        border-color: var(--secondary-blue);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .hover-link {
+        transition: all 0.3s ease;
+    }
+
+    .hover-link:hover {
+        color: var(--secondary-blue) !important;
+        text-decoration: underline !important;
+        transform: translateX(5px);
+    }
+
+    .text-dark {
+        color: var(--text-color) !important;
+    }
+
+    .shadow-lg {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .form-control::placeholder {
+        color: #9ca3af;
+        font-style: italic;
+    }
+
+    @media (max-width: 576px) {
+        .d-flex {
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: stretch !important;
+        }
+        .btn, .hover-link {
+            width: 100%;
+            text-align: center;
+        }
+        .card-body {
+            padding: 2rem !important;
+        }
+        .card {
+            max-width: 100%;
+        }
+    }
+</style>
+{% endblock %}

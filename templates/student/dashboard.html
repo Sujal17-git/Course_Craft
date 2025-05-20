@@ -1,10 +1,37 @@
 {% extends 'student/base.html' %}
 {% block title %}Student Dashboard - Course Craft{% endblock %}
+
 {% block content %}
-    <div class="bg-white p-6 rounded shadow">
-        <h2 class="text-2xl font-bold mb-4">Student Dashboard</h2>
-        <p>Welcome, {{ user.full_name }}!</p>
-        <p>This is your student dashboard. You can view courses, assignments, and grades here.</p>
-        <!-- Add student-specific functionality here -->
+    <h2 class="mb-3 fw-bold">Student Dashboard</h2>
+    
+
+    <!-- Join Class Button -->
+    <button class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#joinClassModal">
+        ➕ Join Class
+    </button>
+
+    <!-- Join Class Modal -->
+    <div class="modal fade" id="joinClassModal" tabindex="-1" aria-labelledby="joinClassModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form method="post">
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title" id="joinClassModalLabel">Join a Class</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="class_code" class="form-label">Class Code / Unique ID</label>
+                <input type="text" class="form-control" id="class_code" name="class_code" placeholder="Enter class code" required>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Join Class</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 {% endblock %}
