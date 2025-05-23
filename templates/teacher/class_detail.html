@@ -1,0 +1,221 @@
+{% extends 'teacher/base.html' %}
+{% block title %}{{ classroom.class_name }} - Details{% endblock %}
+
+{% block content %}
+<style>
+    /* Creative styles for the class detail page */
+    .detail-container {
+        max-width: 90%; /* Spacious width */
+        margin: 0 auto;
+        padding: 40px;
+        background: linear-gradient(145deg, #f0f4f8, #e0e7ff); /* Subtle gradient */
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        animation: fadeIn 0.7s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .detail-hero {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a) 0%, var(--secondary-blue, #3b82f6) 100%);
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        color: white;
+        font-weight: 800;
+        font-size: 2.3rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        margin-bottom: 2.5rem;
+        overflow: hidden;
+    }
+
+    .detail-hero::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.2)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,144C960,149,1056,139,1152,122.7C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+        background-size: cover;
+        animation: wave 8s linear infinite;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* Two-column layout */
+        gap: 25px;
+        margin-bottom: 2.5rem;
+    }
+
+    .detail-card {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 0 20px rgba(59, 130, 246, 0.2); /* Neon glow */
+        padding: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .detail-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), 0 0 30px rgba(59, 130, 246, 0.3);
+    }
+
+    .detail-card h5 {
+        color: var(--primary-blue, #1e3a8a);
+        font-weight: 700;
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+        border-bottom: 3px solid var(--secondary-blue, #3b82f6);
+        padding-bottom: 10px;
+    }
+
+    .detail-card p {
+        margin-bottom: 0.8rem;
+        color: var(--text-color, #1f2937);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .detail-card p i {
+        color: var(--secondary-blue, #3b82f6);
+        font-size: 1.3rem;
+        transition: transform 0.3s ease;
+    }
+
+    .detail-card p:hover i {
+        transform: scale(1.2);
+    }
+
+    .detail-card p.text-muted {
+        color: #6c757d !important;
+        font-size: 0.95rem;
+    }
+
+    .add-section-btn {
+        background: linear-gradient(90deg, var(--secondary-blue, #3b82f6), #ec4899); /* Vibrant gradient */
+        border: none;
+        padding: 14px 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px; /* Rounded button */
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .add-section-btn::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .add-section-btn:hover::after {
+        left: 100%;
+    }
+
+    .add-section-btn:hover {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), #db2777);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .add-section-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Circular progress accent */
+    .detail-container::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent);
+        border-radius: 50%;
+        z-index: 0;
+        animation: pulse 4s ease-in-out infinite;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes wave {
+        0% { background-position-x: 0; }
+        100% { background-position-x: 1440px; }
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.2); opacity: 0.3; }
+        100% { transform: scale(1); opacity: 0.5; }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .detail-container {
+            padding: 20px;
+        }
+        .detail-hero {
+            font-size: 1.7rem;
+            padding: 15px;
+        }
+        .detail-grid {
+            grid-template-columns: 1fr; /* Single column on mobile */
+        }
+        .detail-card {
+            margin-bottom: 1rem;
+        }
+        .add-section-btn {
+            padding: 12px 24px;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="detail-container">
+    <div class="detail-hero">{{ classroom.class_name }}</div>
+
+    <div class="detail-grid">
+        <div class="detail-card">
+            <h5>Class Information</h5>
+            <p><i class="fas fa-book"></i> <strong>Subject:</strong> {{ classroom.subject }}</p>
+            <p><i class="fas fa-key"></i> <strong>Class Key:</strong> {{ classroom.class_key }}</p>
+        </div>
+        <div class="detail-card">
+            <h5>Additional Details</h5>
+            <p><i class="fas fa-info-circle"></i> <strong>Description:</strong> {{ classroom.description|default:"No description provided." }}</p>
+            <p class="text-muted"><i class="fas fa-user"></i> <strong>Created by:</strong> {{ classroom.teacher.full_name }}</p>
+        </div>
+    </div>
+
+    <!-- Add Section Button -->
+    <button class="btn add-section-btn" onclick="return false;">
+        <i class="fas fa-plus"></i> Add Section
+    </button>
+</div>
+
+{% endblock %}

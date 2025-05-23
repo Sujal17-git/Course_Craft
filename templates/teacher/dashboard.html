@@ -2,31 +2,191 @@
 {% block title %}Teacher Dashboard - Course Craft{% endblock %}
 
 {% block content %}
-    <h2 class="mb-3 fw-bold">Teacher Dashboard</h2>
-    <p>Welcome, {{ user.full_name }}!</p>
-    <p>This is your teacher dashboard. You can manage courses, assignments, and students here.</p>
+<style>
+    /* Cool styles for the teacher dashboard */
+    .dashboard-container {
+        max-width: 90%; /* Spacious width */
+        margin: 0 auto;
+        padding: 35px;
+        background: linear-gradient(135deg, #f8fafc, #eff6ff); /* Subtle gradient */
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        animation: fadeIn 0.6s ease-out;
+    }
 
-    <!-- Transparent Green Button -->
-    <a href="{% url 'teacher:create_class' %}" class="btn mt-3 create-class-btn">
-        ➕ Create Class
+    .dashboard-header {
+        color: var(--text-color, #1f2937);
+        font-weight: 800;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), var(--secondary-blue, #3b82f6));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .welcome-text {
+        color: var(--text-color, #1f2937);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .create-class-btn {
+        background: linear-gradient(90deg, var(--secondary-blue, #3b82f6), #10b981); /* Vibrant gradient */
+        border: none;
+        padding: 12px 28px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 10px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .create-class-btn:hover {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), #059669);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+    }
+
+    .class-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 15px rgba(59, 130, 246, 0.15); /* Subtle neon glow */
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .class-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .class-card-header {
+        padding: 15px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .class-card-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .class-card:hover .class-card-header::after {
+        left: 100%;
+    }
+
+    .class-card-body {
+        padding: 15px;
+        background-color: #fff;
+    }
+
+    .class-card-body p {
+        margin-bottom: 0.5rem;
+        color: var(--text-color, #1f2937);
+        font-size: 1rem;
+    }
+
+    .class-card-body small {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    /* Dynamic colors for class headers */
+    .class-color-1 { background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), #4f46e5); }
+    .class-color-2 { background: linear-gradient(90deg, var(--secondary-blue, #3b82f6), #3b82f6); }
+    .class-color-3 { background: linear-gradient(90deg, #28a745, #16a34a); }
+    .class-color-4 { background: linear-gradient(90deg, #ffc107, #f59e0b); }
+    .class-color-5 { background: linear-gradient(90deg, #17a2b8, #0891b2); }
+    .class-color-6 { background: linear-gradient(90deg, #6f42c1, #5b21b6); }
+
+    .class-card-link {
+        color: inherit;
+        display: block;
+        text-decoration: none;
+    }
+
+    .class-card-link:hover .class-card {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 20px;
+        }
+        .dashboard-header {
+            font-size: 1.6rem;
+        }
+        .row-cols-2 {
+            row-cols: 1; /* Single column on mobile */
+        }
+        .class-card {
+            margin-bottom: 1rem;
+        }
+        .create-class-btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <h2 class="dashboard-header">Teacher Dashboard</h2>
+    <p class="welcome-text">Welcome, {{ user.full_name }}!</p>
+    <p class="welcome-text">This is your teacher dashboard. You can manage courses, assignments, and students here.</p>
+
+    <!-- Create Class Button -->
+    <a href="{% url 'teacher:create_class' %}" class="btn create-class-btn">
+        <i class="fas fa-plus"></i> Create Class
     </a>
 
-    <!-- Local styles inside content block -->
-    <style>
-        .create-class-btn {
-            background-color: transparent;
-            color: #28a745;
-            border: 2px solid #28a745;
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+    <!-- Classes Section -->
+    <div class="mt-4">
+        <h5>Your Classes:</h5>
+        <div class="row row-cols-2 g-3"> <!-- Two columns -->
+            {% for class in classes %}
+            <div class="col">
+                <a href="{% url 'teacher:class_detail' class.id %}" class="class-card-link">
+                    <div class="class-card">
+                        <div class="class-card-header class-color-{% cycle '1' '2' '3' '4' '5' '6' %}">
+                            {{ class.class_name }}
+                        </div>
+                        <div class="class-card-body">
+                            <p><strong>Subject:</strong> {{ class.subject }}</p>
+                            <p><strong>Class Key:</strong> {{ class.class_key }}</p>
+                            <p><small>Created by: {{ class.teacher.full_name }}</small></p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <p class="text-muted">You haven't created any classes yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 
-        .create-class-btn:hover {
-            background-color: #28a745;
-            color: white;
-            text-decoration: none;
-        }
-    </style>
 {% endblock %}

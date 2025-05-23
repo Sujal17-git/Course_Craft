@@ -2,36 +2,254 @@
 {% block title %}Student Dashboard - Course Craft{% endblock %}
 
 {% block content %}
-    <h2 class="mb-3 fw-bold">Student Dashboard</h2>
-    
+<style>
+    /* Cool styles for the student dashboard */
+    .dashboard-container {
+        max-width: 90%; /* Spacious width */
+        margin: 0 auto;
+        padding: 35px;
+        background: linear-gradient(135deg, #f8fafc, #eff6ff); /* Subtle gradient */
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .dashboard-header {
+        color: var(--text-color, #1f2937);
+        font-weight: 800;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), var(--secondary-blue, #3b82f6));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .join-class-btn {
+        background: linear-gradient(90deg, var(--secondary-blue, #3b82f6), #10b981); /* Vibrant gradient */
+        border: none;
+        padding: 12px 28px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 10px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .join-class-btn:hover {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), #059669);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    .class-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 15px rgba(59, 130, 246, 0.15); /* Subtle neon glow */
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .class-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .class-card-header {
+        padding: 15px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .class-card-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .class-card:hover .class-card-header::after {
+        left: 100%;
+    }
+
+    .class-card-body {
+        padding: 15px;
+        background-color: #fff;
+    }
+
+    .class-card-body p {
+        margin-bottom: 0.5rem;
+        color: var(--text-color, #1f2937);
+        font-size: 1rem;
+    }
+
+    .class-card small {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    /* Dynamic colors for class headers */
+    .class-color-1 { background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), #4f46e5); }
+    .class-color-2 { background: linear-gradient(90deg, var(--secondary-blue, #3b82f6), #3b82f6); }
+    .class-color-3 { background: linear-gradient(90deg, #28a745, #16a34a); }
+    .class-color-4 { background: linear-gradient(90deg, #ffc107, #f59e0b); }
+    .class-color-5 { background: linear-gradient(90deg, #17a2b8, #0891b2); }
+    .class-color-6 { background: linear-gradient(90deg, #6f42c1, #5b21b6); }
+
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        border: none;
+    }
+
+    .modal-header {
+        background: linear-gradient(90deg, var(--light-blue, #dbeafe), #f0f4f8);
+        border-bottom: none;
+        padding: 20px;
+    }
+
+    .modal-title {
+        color: var(--text-color, #1f2937);
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        padding: 10px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--secondary-blue, #3b82f6);
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, var(--secondary-blue, #3b82f6), #10b981);
+        border: none;
+        padding: 10px 20px;
+        font-weight: 600;
+        border-radius: 8px;
+        color: white;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), #059669);
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        padding: 10px 20px;
+        font-weight: 600;
+        border-radius: 8px;
+        color: white;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 20px;
+        }
+        .dashboard-header {
+            font-size: 1.6rem;
+        }
+        .row-cols-2 {
+            row-cols: 1; /* Single column on mobile */
+        }
+        .class-card {
+            margin-bottom: 1rem;
+        }
+        .join-class-btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <h2 class="dashboard-header">Student Dashboard</h2>
 
     <!-- Join Class Button -->
-    <button class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#joinClassModal">
-        ➕ Join Class
+    <button class="btn join-class-btn" data-bs-toggle="modal" data-bs-target="#joinClassModal">
+        <i class="fas fa-plus"></i> Join Class
     </button>
+
+    <!-- Joined Classes -->
+    <div class="mt-4">
+        <h5>Your Classes:</h5>
+        <div class="row row-cols-2 g-3"> <!-- Two columns -->
+            {% for c in joined_classes %}
+            <div class="col">
+                <a href="{% url 'student:view_class' c.joined_class.id %}" class="text-decoration-none">
+                    <div class="class-card">
+                        <div class="class-card-header class-color-{% cycle '1' '2' '3' '4' '5' '6' %}">
+                            {{ c.joined_class.class_name }}
+                        </div>
+                        <div class="class-card-body">
+                            <p class="mb-1"><strong>Subject:</strong> {{ c.joined_class.subject }}</p>
+                            <small>By {{ c.joined_class.teacher.full_name }}</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <p class="text-muted">You haven't joined any classes yet.</p>
+            {% endfor %}
+        </div>
+    </div>
 
     <!-- Join Class Modal -->
     <div class="modal fade" id="joinClassModal" tabindex="-1" aria-labelledby="joinClassModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form method="post">
-            {% csrf_token %}
-            <div class="modal-header">
-              <h5 class="modal-title" id="joinClassModalLabel">Join a Class</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="joinClassModalLabel">Join a Class</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="class_code" class="form-label">Class Code / Unique ID</label>
+                        <input type="text" class="form-control" id="class_code" name="class_code" placeholder="Enter class code" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Join Class</button>
+                    </div>
+                </form>
             </div>
-            <div class="modal-body">
-              <div class="mb-3">
-                <label for="class_code" class="form-label">Class Code / Unique ID</label>
-                <input type="text" class="form-control" id="class_code" name="class_code" placeholder="Enter class code" required>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-primary">Join Class</button>
-            </div>
-          </form>
         </div>
-      </div>
     </div>
+</div>
+
 {% endblock %}
