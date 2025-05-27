@@ -1,8 +1,8 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from account.models import User
-from .forms import TeacherProfileForm
-from .models import Classroom
+from .forms import TeacherProfileForm,SectionForm
+from .models import Classroom,Section
 
 @login_required
 def dashboard(request):
@@ -38,17 +38,29 @@ def create_class(request):
     return render(request, 'teacher/create_class.html')
 
 @login_required
+
+
+
+
 def class_detail(request, class_id):
-    if not request.user.is_teacher:
-        return redirect('student:dashboard')
+    classroom = get_object_or_404(Classroom, id=class_id)
+    sections = classroom.sections.all()
 
-    classroom = Classroom.objects.filter(id=class_id, teacher=request.user).first()
-    if not classroom:
-        # optional: handle invalid class or permission denied
-        return redirect('teacher:dashboard')
+    if request.method == 'POST':
+        form = SectionForm(request.POST)
+        if form.is_valid():
+            section = form.save(commit=False)
+            section.classroom = classroom
+            section.save()
+            return redirect('class_detail', class_id=class_id)
+    else:
+        form = SectionForm()
 
-    return render(request, 'teacher/class_detail.html', {'classroom': classroom})
-
+    return render(request, 'teacher/class_detail.html', {
+        'classroom': classroom,
+        'sections': sections,
+        'form': form
+    })
 
 
 @login_required
@@ -66,3 +78,21 @@ def manage_profile(request):
         form = TeacherProfileForm(instance=user)
 
     return render(request, 'teacher/manage_profile.html', {'form': form})
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import Classroom, Section
+
+@csrf_exempt
+def add_section(request, class_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            section_name = data.get("name")
+            classroom = Classroom.objects.get(id=class_id)
+            new_section = Section.objects.create(name=section_name, classroom=classroom)
+            return JsonResponse({"success": True, "section_name": new_section.name})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    return JsonResponse({"success": False, "message": "Invalid request method"})

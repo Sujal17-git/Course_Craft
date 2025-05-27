@@ -12,3 +12,10 @@ class Classroom(models.Model):
 
     def __str__(self):
         return f"{self.class_name} ({self.subject})"
+
+class Section(models.Model):
+    name = models.CharField(max_length=100)
+    classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE, related_name='sections')
+
+    def __str__(self):
+        return self.name
