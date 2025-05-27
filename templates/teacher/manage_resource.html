@@ -1,0 +1,291 @@
+{% extends 'teacher/base.html' %}
+{% block title %}Manage Resources - {{ section.name }}{% endblock %}
+
+{% block content %}
+<style>
+    .resource-container {
+        max-width: 90%;
+        margin: 0 auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .resource-hero {
+        background: linear-gradient(90deg, var(--primary-blue, #0284c7), var(--secondary-blue, #38bdf8));
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.75rem;
+        position: relative;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .resource-hero::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.2)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,144C960,149,1056,139,1152,122.7C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+        background-size: cover;
+        animation: wave 8s linear infinite;
+    }
+
+    .form-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .form-container form {
+        display: grid;
+        gap: 1rem;
+        max-width: 600px;
+        width: 100%;
+    }
+
+    .form-container label {
+        font-weight: 600;
+        color: var(--primary-blue, #0284c7);
+    }
+
+    .form-container input, .form-container select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    .form-container select {
+        appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>');
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 1rem;
+    }
+
+    .resource-list .card {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .resource-list .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+        background: var(--primary-blue, #0284c7);
+        border: none;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: var(--secondary-blue, #38bdf8);
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger:hover {
+        background: #b91c1c;
+        transform: translateY(-2px);
+    }
+
+    .error-message {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 0.625rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    @keyframes wave {
+        0% { background-position-x: 0; }
+        100% { background-position-x: 1440px; }
+    }
+
+    @media (max-width: 768px) {
+        .resource-container {
+            padding: 1rem;
+        }
+        .resource-hero {
+            font-size: 1.5rem;
+            padding: 1rem;
+        }
+        .form-container {
+            padding: 1rem;
+        }
+        .resource-list .card {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="resource-container">
+        <div class="resource-hero">Manage Resources</div>
+
+        {% if form_error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ form_error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+
+        <div class="form-container">
+            <form method="post" enctype="multipart/form-data" action="{% url 'teacher:manage_resource' class_id=classroom.id section_id=section.id %}" id="resource-form" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div>
+                    <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="text-danger small">{{ form.title.errors.as_text }}</div>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.resource_type.id_for_label }}" class="form-label">Resource Type</label>
+                    {{ form.resource_type }}
+                    {% if form.resource_type.errors %}
+                        <div class="text-danger small">{{ form.resource_type.errors.as_text }}</div>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.file.id_for_label }}" class="form-label">File (PDF, Word, PPT, HTML, TXT)</label>
+                    {{ form.file }}
+                    {% if form.file.errors %}
+                        <div class="text-danger small">{{ form.file.errors.as_text }}</div>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.link.id_for_label }}" class="form-label">Link</label>
+                    {{ form.link }}
+                    {% if form.link.errors %}
+                        <div class="text-danger small">{{ form.link.errors.as_text }}</div>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-upload me-2"></i> Upload Resource
+                </button>
+            </form>
+        </div>
+
+        <div class="resource-list">
+            <h2 class="h4 mb-4 text-gray-800">Resources</h2>
+            {% if resources %}
+                <div class="row g-3">
+                    {% for resource in resources %}
+                        <div class="col-12">
+                            <div class="card p-3 d-flex flex-column flex-md-row align-items-md-center justify-content-md-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if resource.resource_type == 'file' %}
+    {% if resource.file.name|lower|slice:"-4:" == '.pdf' %}
+        <i class="fas fa-file-pdf text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-5:" == '.docx' or resource.file.name|lower|slice:"-4:" == '.doc' %}
+        <i class="fas fa-file-word text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-5:" == '.pptx' or resource.file.name|lower|slice:"-4:" == '.ppt' %}
+        <i class="fas fa-file-powerpoint text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-5:" == '.xlsx' or resource.file.name|lower|slice:"-4:" == '.xls' %}
+        <i class="fas fa-file-excel text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-4:" == '.txt' %}
+        <i class="fas fa-file-alt text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-5:" == '.html' %}
+        <i class="fas fa-file-code text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-4:" == '.csv' %}
+        <i class="fas fa-file-csv text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-4:" == '.jpg' or resource.file.name|lower|slice:"-5:" == '.jpeg' %}
+        <i class="fas fa-file-image text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-4:" == '.png' %}
+        <i class="fas fa-file-image text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-4:" == '.gif' %}
+        <i class="fas fa-file-image text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-4:" == '.svg' %}
+        <i class="fas fa-file-image text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-4:" == '.zip' %}
+        <i class="fas fa-file-archive text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-4:" == '.rar' %}
+        <i class="fas fa-file-archive text-primary fs-4"></i>
+    {% elif resource.file.name|lower|slice:"-3:" == '.7z' %}
+        <i class="fas fa-file-archive text-primary fs-4"></i>
+    {% else %}
+        <i class="fas fa-file text-primary fs-4"></i>
+    {% endif %}
+{% else %}
+    <i class="fas fa-link text-primary fs-4"></i>
+{% endif %}
+                                    <div>
+                                        <span class="fw-medium">{{ resource.title }}</span>
+                                        <span class="text-muted small">({{ resource.resource_type }})</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2 mt-2 mt-md-0">
+                                    {% if resource.resource_type == 'file' %}
+                                        <a href="{{ resource.file.url }}" target="_blank" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-download me-1"></i> Download
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ resource.link }}" target="_blank" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-external-link-alt me-1"></i> Visit
+                                        </a>
+                                    {% endif %}
+                                    <form method="post" action="{% url 'teacher:delete_resource' class_id=classroom.id section_id=section.id resource_id=resource.id %}" onsubmit="return confirm('Are you sure you want to delete {{ resource.title|escapejs }}?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash me-1"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center text-muted py-4">No resources available.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Clear form after page load if no errors
+    {% if not form_error and not form.errors %}
+        document.getElementById('resource-form').reset();
+    {% endif %}
+
+    // Bootstrap form validation
+    (function () {
+        'use strict';
+        const form = document.getElementById('resource-form');
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    })();
+</script>
+{% endblock %}

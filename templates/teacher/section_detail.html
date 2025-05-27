@@ -72,7 +72,6 @@
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
     }
 
-    /* Animations */
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(30px); }
         to { opacity: 1; transform: translateY(0); }
@@ -83,7 +82,6 @@
         100% { background-position-x: 1440px; }
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
         .section-container { padding: 20px; }
         .section-hero { font-size: 1.7rem; padding: 15px; }
@@ -96,10 +94,10 @@
     <div class="section-hero">{{ section.name }}</div>
 
     <div class="action-grid">
-        <button class="action-btn"><i class="fas fa-book-open"></i> Add Resources</button>
-        <button class="action-btn"><i class="fas fa-tasks"></i> Add Assignments</button>
-        <button class="action-btn"><i class="fas fa-poll"></i> Add Poll</button>
-        <button class="action-btn"><i class="fas fa-question-circle"></i> Add Quiz</button>
+        <a href="{% url 'teacher:manage_resource' class_id=classroom.id section_id=section.id %}" class="action-btn"><i class="fas fa-book-open"></i> Resources</a>
+        <button class="action-btn"><i class="fas fa-tasks"></i> Assignments</button>
+        <button class="action-btn"><i class="fas fa-poll"></i> Poll</button>
+        <button class="action-btn"><i class="fas fa-question-circle"></i> Quiz</button>
     </div>
 </div>
 {% endblock %}
