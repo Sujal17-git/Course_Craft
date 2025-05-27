@@ -1,5 +1,5 @@
 {% extends 'student/base.html' %}
-{% block title %}{{ class_obj.class_name }} - Course Craft{% endblock %}
+{% block title %}{{ class_obj.class_name }} - Details{% endblock %}
 
 {% block content %}
 <style>
@@ -96,7 +96,30 @@
         font-size: 0.95rem;
     }
 
-    /* Section List Styles */
+    .action-btn {
+        background: linear-gradient(90deg, #ef4444, #f87171);
+        border: none;
+        padding: 14px 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        margin-bottom: 2rem;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        background: linear-gradient(90deg, #dc2626, #ef4444);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+
     .section-list {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -166,46 +189,22 @@
         100% { background-position-x: 1440px; }
     }
 
-    /* Circular progress accent */
-    .detail-container::before {
-        content: '';
-        position: absolute;
-        top: -50px;
-        right: -50px;
-        width: 150px;
-        height: 150px;
-        background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent);
-        border-radius: 50%;
-        z-index: 0;
-        animation: pulse 4s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-        0% { transform: scale(1); opacity: 0.5; }
-        50% { transform: scale(1.05); opacity: 0.7; }
-        100% { transform: scale(1); opacity: 0.5; }
-    }
-
-    /* Responsive adjustments */
+    /* Responsive */
     @media (max-width: 768px) {
-        .detail-container {
-            padding: 20px;
-        }
-        .detail-hero {
-            font-size: 1.7rem;
-            padding: 15px;
-        }
-        .detail-grid {
-            grid-template-columns: 1fr;
-        }
-        .section-list {
-            grid-template-columns: 1fr;
-        }
+        .detail-container { padding: 20px; }
+        .detail-hero { font-size: 1.7rem; padding: 15px; }
+        .detail-grid { grid-template-columns: 1fr; }
+        .section-list { grid-template-columns: 1fr; }
+        .action-btn { width: 100%; }
     }
 </style>
 
 <div class="detail-container">
     <div class="detail-hero">{{ class_obj.class_name }}</div>
+
+    <button class="action-btn leave-class-btn" onclick="leaveClass()">
+        <i class="fas fa-sign-out-alt"></i> Leave Class
+    </button>
 
     <div class="detail-grid">
         <div class="detail-card">
@@ -214,9 +213,9 @@
             <p><i class="fas fa-key"></i> <strong>Class Key:</strong> {{ class_obj.class_key }}</p>
         </div>
         <div class="detail-card">
-            <h5>Instructor Details</h5>
-            <p><i class="fas fa-user"></i> <strong>Teacher:</strong> {{ class_obj.teacher.full_name }}</p>
+            <h5>Additional Details</h5>
             <p><i class="fas fa-info-circle"></i> <strong>Description:</strong> {{ class_obj.description|default:"No description provided." }}</p>
+            <p class="text-muted"><i class="fas fa-user"></i> <strong>Created by:</strong> {{ class_obj.teacher.full_name }}</p>
         </div>
     </div>
 
@@ -230,9 +229,40 @@
                     </a>
                 </div>
             {% empty %}
-                <div class="section-card no-sections">No sections available yet.</div>
+                <div class="section-card no-sections">No sections added yet.</div>
             {% endfor %}
         </div>
     </div>
 </div>
+
+<script>
+function leaveClass() {
+    if (!confirm("Are you sure you want to leave this class?")) return;
+
+    fetch("{% url 'student:leave_class' class_obj.id %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Network response was not OK");
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert("You have successfully left the class.");
+            window.location.href = "{% url 'student:dashboard' %}";
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Failed to leave class. Please try again.");
+    });
+}
+</script>
 {% endblock %}

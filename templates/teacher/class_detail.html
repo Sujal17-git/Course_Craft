@@ -96,7 +96,14 @@
         font-size: 0.95rem;
     }
 
-    .add-section-btn {
+    .button-group {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 2rem;
+        justify-content: center;
+    }
+
+    .action-btn {
         background: linear-gradient(90deg, var(--secondary-blue, #3b82f6), #ec4899);
         border: none;
         padding: 14px 30px;
@@ -112,8 +119,40 @@
         cursor: pointer;
     }
 
-    .add-section-btn:hover {
+    .action-btn.student-list-btn {
+        background: linear-gradient(90deg, #10b981, #34d399);
+    }
+
+    .action-btn:hover {
         background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), #db2777);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .action-btn.student-list-btn:hover {
+        background: linear-gradient(90deg, #059669, #22c55e);
+    }
+
+    .delete-class-btn {
+        background: linear-gradient(90deg, #ef4444, #f87171);
+        border: none;
+        padding: 14px 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        margin-bottom: 1.5rem;
+        justify-content: center;
+    }
+
+    .delete-class-btn:hover {
+        background: linear-gradient(90deg, #dc2626, #ef4444);
         transform: translateY(-3px);
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
     }
@@ -137,7 +176,7 @@
         padding: 30px;
         border-radius: 12px;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-        max-width: 400px;
+        max-width: 600px;
         width: 100%;
         text-align: center;
         animation: fadeIn 0.3s ease-out;
@@ -178,6 +217,49 @@
     .modal-actions button:last-child {
         background: #3b82f6;
         color: white;
+    }
+
+    /* Student Table Styles */
+    .student-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    .student-table th, .student-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .student-table th {
+        background: #f1f5f9;
+        color: #1e3a8a;
+        font-weight: 600;
+    }
+
+    .student-table td {
+        color: #1f2937;
+    }
+
+    .student-table .remove-btn {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .student-table .remove-btn:hover {
+        background: #dc2626;
+    }
+
+    .total-students {
+        margin-top: 15px;
+        font-weight: 600;
+        color: #1e3a8a;
     }
 
     /* Section List Styles */
@@ -256,10 +338,16 @@
         .detail-hero { font-size: 1.7rem; padding: 15px; }
         .detail-grid { grid-template-columns: 1fr; }
         .section-list { grid-template-columns: 1fr; }
+        .button-group { flex-direction: column; align-items: center; }
+        .action-btn { width: 100%; justify-content: center; }
+        .delete-class-btn { width: 100%; }
     }
 </style>
 
 <div class="detail-container">
+    <button class="delete-class-btn" onclick="deleteClass()">
+        <i class="fas fa-trash-alt"></i> Delete Class
+    </button>
     <div class="detail-hero">{{ classroom.class_name }}</div>
 
     <div class="detail-grid">
@@ -273,6 +361,15 @@
             <p><i class="fas fa-info-circle"></i> <strong>Description:</strong> {{ classroom.description|default:"No description provided." }}</p>
             <p class="text-muted"><i class="fas fa-user"></i> <strong>Created by:</strong> {{ classroom.teacher.full_name }}</p>
         </div>
+    </div>
+
+    <div class="button-group">
+        <button class="action-btn add-section-btn" onclick="openModal()">
+            <i class="fas fa-plus"></i> Add Section
+        </button>
+        <button class="action-btn student-list-btn" onclick="openStudentModal()">
+            <i class="fas fa-users"></i> Student List
+        </button>
     </div>
 
     <div class="detail-card">
@@ -289,10 +386,6 @@
             {% endfor %}
         </div>
     </div>
-
-    <button class="add-section-btn" onclick="openModal()">
-        <i class="fas fa-plus"></i> Add Section
-    </button>
 </div>
 
 <!-- Modal for Section Name Input -->
@@ -303,6 +396,29 @@
         <div class="modal-actions">
             <button onclick="closeModal()">Cancel</button>
             <button onclick="submitSection()">Submit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Student List -->
+<div id="studentModal" class="modal-overlay">
+    <div class="modal-box">
+        <h2>Student List</h2>
+        <table class="student-table">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Join Time</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="student-table-body">
+                <!-- Student data will be populated here -->
+            </tbody>
+        </table>
+        <div class="total-students" id="total-students">Total Students: 0</div>
+        <div class="modal-actions">
+            <button onclick="closeStudentModal()">Close</button>
         </div>
     </div>
 </div>
@@ -352,6 +468,101 @@ function submitSection() {
     .catch(error => {
         console.error("Error:", error);
         alert("Failed to add section. Please try again.");
+    });
+}
+
+function openStudentModal() {
+    fetch("{% url 'teacher:get_students' classroom.id %}", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Network response was not OK");
+        return response.json();
+    })
+    .then(data => {
+        const tableBody = document.getElementById('student-table-body');
+        tableBody.innerHTML = '';
+        data.students.forEach(student => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${student.full_name}</td>
+                <td>${student.joined_at}</td>
+                <td><button class="remove-btn" onclick="removeStudent(${student.student_id})">Remove</button></td>
+            `;
+            tableBody.appendChild(row);
+        });
+        document.getElementById('total-students').textContent = `Total Students: ${data.students.length}`;
+        document.getElementById('studentModal').style.display = 'flex';
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Failed to load student list. Please try again.");
+    });
+}
+
+function closeStudentModal() {
+    document.getElementById('studentModal').style.display = 'none';
+}
+
+function removeStudent(studentId) {
+    if (!confirm("Are you sure you want to remove this student?")) return;
+
+    fetch("{% url 'teacher:remove_student' classroom.id %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify({ student_id: studentId })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Network response was not OK");
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            openStudentModal(); // Refresh the student list
+            alert("Student removed successfully.");
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Failed to remove student. Please try again.");
+    });
+}
+
+function deleteClass() {
+    if (!confirm("Are you sure you want to delete this class? This will remove all associated sections and student enrollments.")) return;
+
+    fetch("{% url 'teacher:delete_class' classroom.id %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Network response was not OK");
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert("Class deleted successfully.");
+            window.location.href = "{% url 'teacher:dashboard' %}";
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Failed to delete class. Please try again.");
     });
 }
 </script>

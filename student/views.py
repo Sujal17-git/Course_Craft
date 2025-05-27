@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from account.models import User
 from .forms import StudentProfileForm
 from .models import StudentClassroom
 from teacher.models import Classroom, Section
+import json
 
 @login_required
 def dashboard(request):
@@ -61,3 +64,18 @@ def section_detail(request, class_id, section_id):
         'class_obj': class_detail,
         'section': section
     })
+
+@csrf_exempt
+@login_required
+def leave_class(request, class_id):
+    if request.user.is_teacher:
+        return JsonResponse({"success": False, "message": "Teachers cannot leave classes"}, status=403)
+
+    if request.method == "POST":
+        try:
+            student_class = get_object_or_404(StudentClassroom, student=request.user, joined_class_id=class_id)
+            student_class.delete()
+            return JsonResponse({"success": True, "message": "Successfully left the class"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    return JsonResponse({"success": False, "message": "Invalid request method"})

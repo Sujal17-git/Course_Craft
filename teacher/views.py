@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from account.models import User
 from .forms import TeacherProfileForm, SectionForm
 from .models import Classroom, Section
+from student.models import StudentClassroom
 import json
 
 @login_required
@@ -96,3 +97,50 @@ def section_detail(request, class_id, section_id):
         'classroom': classroom,
         'section': section
     })
+
+@login_required
+def get_students(request, class_id):
+    if not request.user.is_teacher:
+        return JsonResponse({"success": False, "message": "Unauthorized"}, status=403)
+
+    classroom = get_object_or_404(Classroom, id=class_id, teacher=request.user)
+    student_classes = StudentClassroom.objects.filter(joined_class=classroom)
+    students = [{
+        'student_id': sc.student.id,
+        'full_name': sc.student.full_name,
+        'joined_at': sc.joined_at.strftime('%Y-%m-%d %H:%M:%S')
+    } for sc in student_classes]
+    return JsonResponse({"success": True, "students": students})
+
+@csrf_exempt
+@login_required
+def remove_student(request, class_id):
+    if not request.user.is_teacher:
+        return JsonResponse({"success": False, "message": "Unauthorized"}, status=403)
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            student_id = data.get("student_id")
+            classroom = get_object_or_404(Classroom, id=class_id, teacher=request.user)
+            student_class = get_object_or_404(StudentClassroom, student_id=student_id, joined_class=classroom)
+            student_class.delete()
+            return JsonResponse({"success": True, "message": "Student removed successfully"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    return JsonResponse({"success": False, "message": "Invalid request method"})
+
+@csrf_exempt
+@login_required
+def delete_class(request, class_id):
+    if not request.user.is_teacher:
+        return JsonResponse({"success": False, "message": "Unauthorized"}, status=403)
+
+    if request.method == "POST":
+        try:
+            classroom = get_object_or_404(Classroom, id=class_id, teacher=request.user)
+            classroom.delete()  # Cascades to delete Sections and StudentClassroom records
+            return JsonResponse({"success": True, "message": "Class deleted successfully"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    return JsonResponse({"success": False, "message": "Invalid request method"})

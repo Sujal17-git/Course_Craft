@@ -8,4 +8,5 @@ urlpatterns = [
     path('manage-profile/', views.manage_profile, name='manage_profile'),
     path('class/<int:class_id>/', views.view_class, name='view_class'),
     path('class/<int:class_id>/section/<int:section_id>/', views.section_detail, name='section_detail'),
+    path('class/<int:class_id>/leave/', views.leave_class, name='leave_class'),
 ]
