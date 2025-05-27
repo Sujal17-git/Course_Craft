@@ -3,12 +3,11 @@
 
 {% block content %}
 <style>
-    /* Creative styles for the student class detail page */
     .detail-container {
-        max-width: 90%; /* Spacious width */
+        max-width: 90%;
         margin: 0 auto;
         padding: 40px;
-        background: linear-gradient(145deg, #f0f4f8, #e0e7ff); /* Subtle gradient */
+        background: linear-gradient(145deg, #f0f4f8, #e0e7ff);
         border-radius: 18px;
         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
         animation: fadeIn 0.7s ease-out;
@@ -45,7 +44,7 @@
 
     .detail-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr); /* Two-column layout */
+        grid-template-columns: repeat(2, 1fr);
         gap: 25px;
         margin-bottom: 2.5rem;
     }
@@ -53,11 +52,10 @@
     .detail-card {
         background: white;
         border-radius: 14px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 0 20px rgba(59, 130, 246, 0.2); /* Neon glow */
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 0 20px rgba(59, 130, 246, 0.2);
         padding: 20px;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
-        overflow: hidden;
     }
 
     .detail-card:hover {
@@ -98,16 +96,74 @@
         font-size: 0.95rem;
     }
 
-    .content-placeholder {
+    /* Section List Styles */
+    .section-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+        padding: 0;
+    }
+
+    .section-card {
         background: white;
-        border-radius: 14px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        text-align: center;
-        color: #6c757d;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 15px rgba(59, 130, 246, 0.2);
+        padding: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+    }
+
+    .section-card a {
+        color: var(--text-color, #1f2937);
+        text-decoration: none;
         font-size: 1.1rem;
-        margin-top: 1.5rem;
-        animation: pulse 2s ease-in-out infinite;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .section-card i {
+        color: var(--secondary-blue, #3b82f6);
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .section-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .section-card:hover i {
+        transform: scale(1.2);
+    }
+
+    .section-card.no-sections {
+        color: #6c757d;
+        font-style: italic;
+        cursor: default;
+        box-shadow: none;
+    }
+
+    .section-card.no-sections:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes wave {
+        0% { background-position-x: 0; }
+        100% { background-position-x: 1440px; }
     }
 
     /* Circular progress accent */
@@ -122,17 +178,6 @@
         border-radius: 50%;
         z-index: 0;
         animation: pulse 4s ease-in-out infinite;
-    }
-
-    /* Animations */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes wave {
-        0% { background-position-x: 0; }
-        100% { background-position-x: 1440px; }
     }
 
     @keyframes pulse {
@@ -151,10 +196,10 @@
             padding: 15px;
         }
         .detail-grid {
-            grid-template-columns: 1fr; /* Single column on mobile */
+            grid-template-columns: 1fr;
         }
-        .detail-card {
-            margin-bottom: 1rem;
+        .section-list {
+            grid-template-columns: 1fr;
         }
     }
 </style>
@@ -171,13 +216,23 @@
         <div class="detail-card">
             <h5>Instructor Details</h5>
             <p><i class="fas fa-user"></i> <strong>Teacher:</strong> {{ class_obj.teacher.full_name }}</p>
+            <p><i class="fas fa-info-circle"></i> <strong>Description:</strong> {{ class_obj.description|default:"No description provided." }}</p>
         </div>
     </div>
 
-    <hr>
-    <div class="content-placeholder">
-        Class content will appear here.
+    <div class="detail-card">
+        <h5>Sections</h5>
+        <div class="section-list">
+            {% for section in sections %}
+                <div class="section-card">
+                    <a href="{% url 'student:section_detail' class_obj.id section.id %}">
+                        <i class="fas fa-layer-group"></i> {{ section.name }}
+                    </a>
+                </div>
+            {% empty %}
+                <div class="section-card no-sections">No sections available yet.</div>
+            {% endfor %}
+        </div>
     </div>
 </div>
-
 {% endblock %}

@@ -9,4 +9,5 @@ urlpatterns = [
     path('manage-profile/', views.manage_profile, name='manage_profile'),
     path('class/<int:class_id>/', views.class_detail, name='class_detail'),
     path('class/<int:class_id>/add-section/', views.add_section, name='add_section'),
+    path('class/<int:class_id>/section/<int:section_id>/', views.section_detail, name='section_detail'),
 ]

@@ -4,8 +4,7 @@ from django.contrib.auth.decorators import login_required
 from account.models import User
 from .forms import StudentProfileForm
 from .models import StudentClassroom
-from teacher.models import Classroom
-
+from teacher.models import Classroom, Section
 
 @login_required
 def dashboard(request):
@@ -30,7 +29,7 @@ def dashboard(request):
 @login_required
 def manage_profile(request):
     if request.user.is_teacher:
-        return redirect('dashboard')  # Only allow students here
+        return redirect('teacher:dashboard')  # Only allow students here
 
     user = request.user
     if request.method == 'POST':
@@ -47,4 +46,18 @@ def manage_profile(request):
 def view_class(request, class_id):
     student_class = get_object_or_404(StudentClassroom, student=request.user, joined_class_id=class_id)
     class_detail = student_class.joined_class
-    return render(request, 'student/class_detail.html', {'class_obj': class_detail})
+    sections = class_detail.sections.all()  # Get all sections for the class
+    return render(request, 'student/class_detail.html', {
+        'class_obj': class_detail,
+        'sections': sections
+    })
+
+@login_required
+def section_detail(request, class_id, section_id):
+    student_class = get_object_or_404(StudentClassroom, student=request.user, joined_class_id=class_id)
+    class_detail = student_class.joined_class
+    section = get_object_or_404(Section, id=section_id, classroom=class_detail)
+    return render(request, 'student/section_detail.html', {
+        'class_obj': class_detail,
+        'section': section
+    })
