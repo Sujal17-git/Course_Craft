@@ -1,5 +1,5 @@
 {% extends 'teacher/base.html' %}
-{% block title %}{{ section.name }} - {{ classroom.class_name }}{% endblock %}
+{% block title %}Manage Assignment - {{ section.name }}{% endblock %}
 
 {% block content %}
 <style>
@@ -42,10 +42,11 @@
         animation: wave 8s linear infinite;
     }
 
-    .action-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 25px;
+    .assignment-form-container {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         margin-bottom: 2.5rem;
     }
 
@@ -57,7 +58,7 @@
         font-weight: 600;
         border-radius: 50px;
         color: white;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 10px;
@@ -85,19 +86,21 @@
     @media (max-width: 768px) {
         .section-container { padding: 20px; }
         .section-hero { font-size: 1.7rem; padding: 15px; }
-        .action-grid { grid-template-columns: 1fr; }
         .action-btn { padding: 12px 24px; font-size: 1rem; }
     }
 </style>
 
 <div class="section-container">
-    <div class="section-hero">{{ section.name }}</div>
+    <div class="section-hero">Manage Assignment: {{ assignment.title }}</div>
 
-    <div class="action-grid">
-        <a href="{% url 'teacher:manage_resource' class_id=classroom.id section_id=section.id %}" class="action-btn"><i class="fas fa-book-open"></i> Resources</a>
-        <a href="{% url 'teacher:add_assignment' class_id=classroom.id section_id=section.id %}" class="action-btn"><i class="fas fa-tasks"></i> Assignments</a>
-        <button class="action-btn"><i class="fas fa-poll"></i> Poll</button>
-        <button class="action-btn"><i class="fas fa-question-circle"></i> Quiz</button>
+    <div class="assignment-form-container">
+        <h3>Edit Assignment</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="action-btn"><i class="fas fa-save"></i> Save Changes</button>
+            <a href="{% url 'teacher:section_detail' class_id=classroom.id section_id=section.id %}" class="action-btn"><i class="fas fa-arrow-left"></i> Back</a>
+        </form>
     </div>
 </div>
 {% endblock %}

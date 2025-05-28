@@ -1,4 +1,3 @@
-# teacher/models.py
 from django.db import models
 from account.models import User
 from django.core.validators import FileExtensionValidator
@@ -37,6 +36,22 @@ class Resource(models.Model):
     )
     link = models.URLField(blank=True, null=True)
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='resources')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+class Assignment(models.Model):
+    title = models.CharField(max_length=200)
+    instructions = models.TextField(blank=True)
+    file = models.FileField(
+        upload_to='assignments/%Y/%m/%d/',
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'html', 'csv',
+ 'jpg', 'jpeg', 'png', 'gif', 'svg', 'zip', 'rar', '7z'])]
+    )
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='assignments')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

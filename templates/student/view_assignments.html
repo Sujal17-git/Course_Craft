@@ -1,0 +1,442 @@
+{% extends 'student/base.html' %}
+{% block title %}Assignments - {{ section.name }} - {{ class_obj.class_name }}{% endblock %}
+
+{% block content %}
+<style>
+    .section-container {
+        max-width: 95%;
+        margin: 2rem auto;
+        padding: 30px;
+        background: linear-gradient(135deg, #f5f7fa, #e0e7ff);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.8s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .section-hero {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), var(--secondary-blue, #3b82f6));
+        padding: 20px;
+        border-radius: 16px;
+        text-align: center;
+        color: white;
+        font-weight: 700;
+        font-size: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        position: relative;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .section-hero::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.2)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,144C960,149,1056,139,1152,122.7C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+        background-size: cover;
+        animation: wave 10s linear infinite;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        background: linear-gradient(90deg, #6b7280, #4b5563);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+        background: linear-gradient(90deg, #4b5563, #374151);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .assignment-list {
+        margin-top: 2rem;
+    }
+
+    .assignment-card {
+        background: white;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .assignment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .assignment-header {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        background: linear-gradient(90deg, #f3f4f6, #ffffff);
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .assignment-icon {
+        font-size: 2rem;
+        color: var(--secondary-blue, #3b82f6);
+        margin-right: 15px;
+    }
+
+    .assignment-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    .assignment-date {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-left: 10px;
+    }
+
+    .status-badge {
+        margin-left: auto;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-submitted {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .assignment-body {
+        padding: 20px;
+    }
+
+    .instructions {
+        font-size: 1rem;
+        color: #4b5563;
+        line-height: 1.6;
+        margin-bottom: 15px;
+        max-height: 3.2em;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .instructions.expanded {
+        max-height: 1000px;
+    }
+
+    .toggle-instructions {
+        color: var(--secondary-blue, #3b82f6);
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+
+    .toggle-instructions:hover {
+        text-decoration: underline;
+    }
+
+    .assignment-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 20px;
+        background: #fafafa;
+        border-top: 1px solid #e5e7eb;
+        justify-content: flex-end;
+    }
+
+    .action-btn {
+        background: linear-gradient(90deg, var(--secondary-blue, #3b82f6), #ec4899);
+        border: none;
+        padding: 10px 20px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border-radius: 50px;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+    }
+
+    .action-btn:hover {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), #db2777);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .action-btn.download {
+        background: linear-gradient(90deg, #10b981, #059669);
+    }
+
+    .action-btn.download:hover {
+        background: linear-gradient(90deg, #059669, #047857);
+    }
+
+    .action-btn.manage {
+        background: linear-gradient(90deg, #f59e0b, #d97706);
+    }
+
+    .action-btn.manage:hover {
+        background: linear-gradient(90deg, #d97706, #b45309);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal.show {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 25px;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #1f2937;
+    }
+
+    .close-modal {
+        font-size: 1.5rem;
+        color: #6b7280;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .close-modal:hover {
+        color: #1f2937;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        padding: 12px;
+        font-size: 1rem;
+        width: 100%;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--secondary-blue, #3b82f6);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+
+    .success-message {
+        color: #059669;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes wave {
+        0% { background-position-x: 0; }
+        100% { background-position-x: 1440px; }
+    }
+
+    @media (max-width: 768px) {
+        .section-container {
+            padding: 20px;
+            margin: 1rem auto;
+        }
+        .section-hero {
+            font-size: 1.5rem;
+            padding: 15px;
+        }
+        .assignment-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .assignment-title {
+            font-size: 1.2rem;
+        }
+        .assignment-date {
+            margin-left: 0;
+        }
+        .status-badge {
+            margin-left: 0;
+        }
+        .assignment-footer {
+            justify-content: flex-start;
+        }
+        .action-btn {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        .modal-content {
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="section-container">
+    <a href="{% url 'student:section_detail' class_id=class_obj.id section_id=section.id %}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Section
+    </a>
+
+    <div class="section-hero">Assignments - {{ section.name }}</div>
+
+    {% if messages %}
+        <div class="success-message">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if form_error %}
+        <p class="error-message">{{ form_error }}</p>
+    {% endif %}
+
+    <div class="assignment-list">
+        <h3>Assignments</h3>
+        {% for data in assignments_data %}
+            <div class="assignment-card">
+                <div class="assignment-header">
+                    <i class="fas fa-file-alt assignment-icon"></i>
+                    <h3 class="assignment-title">{{ data.assignment.title }}</h3>
+                    <span class="assignment-date">(Uploaded: {{ data.assignment.uploaded_at|date:"Y-m-d H:i" }})</span>
+                    <span class="status-badge {% if data.submission %}status-submitted{% else %}status-pending{% endif %}">
+                        {% if data.submission %}Submitted{% else %}Pending{% endif %}
+                    </span>
+                </div>
+                <div class="assignment-body">
+                    {% if data.assignment.instructions %}
+                        <p class="instructions" id="instructions-{{ data.assignment.id }}">{{ data.assignment.instructions }}</p>
+                        <span class="toggle-instructions" onclick="toggleInstructions('{{ data.assignment.id }}')">Show More</span>
+                    {% else %}
+                        <p class="instructions">No instructions provided.</p>
+                    {% endif %}
+                </div>
+                <div class="assignment-footer">
+                    {% if data.assignment.file %}
+                        <a href="{{ data.assignment.file.url }}" class="action-btn download" target="_blank">
+                            <i class="fas fa-download"></i> Download Assignment
+                        </a>
+                    {% endif %}
+                    {% if data.submission %}
+                        <a href="{{ data.submission.file.url }}" class="action-btn download" target="_blank">
+                            <i class="fas fa-file-download"></i> View Submission
+                        </a>
+                        <a href="{% url 'student:manage_submission' class_id=class_obj.id section_id=section.id assignment_id=data.assignment.id %}" class="action-btn manage">
+                            <i class="fas fa-edit"></i> Manage Submission
+                        </a>
+                    {% else %}
+                        <button class="action-btn" onclick="openModal('{{ data.assignment.id }}')">
+                            <i class="fas fa-upload"></i> Submit Assignment
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Modal for Submission -->
+            <div class="modal" id="modal-{{ data.assignment.id }}">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Submit Assignment: {{ data.assignment.title }}</h3>
+                        <span class="close-modal" onclick="closeModal('{{ data.assignment.id }}')">&times;</span>
+                    </div>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="assignment_id" value="{{ data.assignment.id }}">
+                        {{ form.as_p }}
+                        <button type="submit" class="action-btn">
+                            <i class="fas fa-upload"></i> Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% empty %}
+            <p>No assignments available.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function toggleInstructions(id) {
+        const instructions = document.getElementById(`instructions-${id}`);
+        const toggle = instructions.nextElementSibling;
+        if (instructions.classList.contains('expanded')) {
+            instructions.classList.remove('expanded');
+            toggle.textContent = 'Show More';
+        } else {
+            instructions.classList.add('expanded');
+            toggle.textContent = 'Show Less';
+        }
+    }
+
+    function openModal(id) {
+        document.getElementById(`modal-${id}`).classList.add('show');
+    }
+
+    function closeModal(id) {
+        document.getElementById(`modal-${id}`).classList.remove('show');
+    }
+</script>
+{% endblock %}

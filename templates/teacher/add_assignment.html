@@ -1,0 +1,487 @@
+{% extends 'teacher/base.html' %}
+{% block title %}Assignments - {{ section.name }}{% endblock %}
+
+{% block content %}
+<style>
+    .section-container {
+        max-width: 90%;
+        margin: 0 auto;
+        padding: 40px;
+        background: linear-gradient(145deg, #f0f4f8, #e0e7ff);
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        animation: fadeIn 0.7s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .section-hero {
+        background: linear-gradient(90deg, var(--primary-blue, #0284c7) 0%, var(--secondary-blue, #38bdf8) 100%);
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        color: white;
+        font-weight: 800;
+        font-size: 2.3rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        margin-bottom: 2.5rem;
+        overflow: hidden;
+    }
+
+    .section-hero::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.2)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,144C960,149,1056,139,1152,122.7C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+        background-size: cover;
+        animation: wave 8s linear infinite;
+    }
+
+    .assignment-form-container {
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        margin-bottom: 3rem;
+        transition: transform 0.3s ease;
+    }
+
+    .assignment-form-container:hover {
+        transform: translateY(-5px);
+    }
+
+    .assignment-list {
+        margin-top: 2.5rem;
+    }
+
+    .assignment-item {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .assignment-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .assignment-details {
+        flex: 1;
+        margin-right: 20px;
+    }
+
+    .assignment-details p {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: #1f2937;
+    }
+
+    .assignment-details .instructions {
+        font-size: 0.95rem;
+        color: #4b5563;
+        margin-top: 5px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .assignment-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        background: linear-gradient(90deg, var(--secondary-blue, #38bdf8), #ec4899);
+        border: none;
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+
+    .action-btn:hover {
+        background: linear-gradient(90deg, var(--primary-blue, #0284c7), #db2777);
+        transform: translateY(-3px);
+        box-shadow: 0.6px 16px rgba(0, 0,0.25);
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        padding: 10px;
+        font-size: 1rem;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--secondary-blue, #38bdf8);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0);
+2.2);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        overflow: auto;
+    }
+
+    .modal-content {
+        background: #ffffff;
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 800px;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #1f2937;
+    }
+
+    .close-btn {
+        font-size: 1.5rem;
+        color: #4b5563;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .close-btn:hover {
+        color: #dc2626;
+    }
+
+    .submissions-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .submissions-table th, .submissions-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .submissions-table th {
+        background: #f3f4f6;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .submissions-table td {
+        color: #4b5563;
+    }
+
+    .submissions-table a {
+        color: var(--secondary-blue, #38bdf);
+        text-decoration: none;
+    }
+
+    .submissions-table a:hover {
+        text-decoration: underline;
+    }
+
+    .reject-btn {
+        background: #dc2626;
+        border: none;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-radius: 50px;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.3s ease;
+    }
+
+    .reject-btn:hover {
+        background: #b91c1c;
+        transform: translateY(-2px);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0'; transform: translateY(30px); }
+        to { opacity: '1'; transform: translateY(0); }
+    }
+
+    @keyframes wave {
+        0% { background-position-x: 0; }
+        100% { background-position-x: 1440px; }
+    }
+
+    @media (max-width: 768px) {
+        .section-container { padding: 20px; }
+        .section-hero { font-size: 1.7rem; padding: 15px; }
+        .action-btn { padding: 10px 20px; font-size: 0.9rem; }
+        .assignment-item { flex-direction: column; align-items: flex-start; gap: 15px; }
+        .assignment-actions { width: 100%; justify-content: space-between; }
+        .assignment-details p { font-size: 1rem; }
+        .assignment-details .instructions { font-size: 0.85rem; }
+        .modal-content { width: 95%; margin: 10% auto; }
+        .submissions-table th, .submissions-table td { padding: 8px; font-size: 0.85rem; }
+    }
+</style>
+
+<div class="section-container">
+    <div class="section-hero">Assignments - {{ section.name }}</div>
+
+    <div class="assignment-form-container">
+        <h3>Add New Assignment</h3>
+        {% if form_error %}
+            <p class="error-message">{{ form_error }}</p>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="action-btn"><i class="fas fa-upload"></i> Upload Assignment</button>
+        </form>
+    </div>
+
+    <div class="assignment-list">
+        <h3>Assignments</h3>
+        {% for assignment in assignments %}
+            <div class="assignment-item">
+                <div class="assignment-details">
+                    <p>{{ assignment.title }} (Uploaded: {{ assignment.uploaded_at|date:"Y-m-d H:i" }})</p>
+                    {% if assignment.instructions %}
+                        <p class="instructions">{{ assignment.instructions }}</p>
+                    {% else %}
+                        <p class="instructions">No instructions provided.</p>
+                    {% endif %}
+                </div>
+                <div class="assignment-actions">
+                    <a href="{% url 'teacher:manage_assignment' class_id=classroom.id section_id=section.id assignment_id=assignment.id %}" class="action-btn"><i class="fas fa-edit"></i> Manage</a>
+                    <button class="action-btn student-list-btn" data-assignment-id="{{ assignment.id }}"><i class="fas fa-users"></i> Student List</button>
+                    <form method="post" action="{% url 'teacher:delete_assignment' class_id=classroom.id section_id=section.id assignment_id=assignment.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn"><i class="fas fa-trash"></i> Delete</button>
+                    </form>
+                </div>
+            </div>
+        {% empty %}
+            <p>No assignments available.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="submissionsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Student Submissions</h2>
+            <span class="close-btn">×</span>
+        </div>
+        <table class="submissions-table">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Submitted File</th>
+                    <th>Submission Time</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="submissionsTableBody">
+                <!-- Table rows will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('submissionsModal');
+    const closeBtn = document.querySelector('.close-btn');
+    const studentListButtons = document.querySelectorAll('.student-list-btn');
+    const classroomId = {{ classroom.id|default_if_none:0 }};
+    const sectionId = {{ section.id|default_if_none:0 }};
+
+    // Validate context variables
+    if (!classroomId || !sectionId) {
+        console.error('Error: classroomId or sectionId is missing.', { classroomId, sectionId });
+        alert('Error: Unable to load submissions due to missing classroom or section information.');
+        return;
+    }
+
+    // Test modal visibility
+    console.log('Modal element:', modal);
+    console.log('Student list buttons:', studentListButtons);
+
+    // Close modal when clicking the close button
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+            console.log('Modal closed via close button');
+        });
+    }
+
+    // Close modal when clicking outside of it
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            console.log('Modal closed via outside click');
+        }
+    });
+
+    // Handle student list button clicks
+    studentListButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            console.log('Student List button clicked');
+            const assignmentId = this.getAttribute('data-assignment-id');
+            if (!assignmentId) {
+                console.error('Error: assignmentId is missing.');
+                alert('Error: Unable to load submissions due to missing assignment information.');
+                return;
+            }
+
+            // Show modal immediately to confirm UI works
+            modal.style.display = 'block';
+            const tableBody = document.getElementById('submissionsTableBody');
+            tableBody.innerHTML = '<tr><td colspan="4">Loading submissions...</td></tr>';
+
+            const url = `/teacher/class/${classroomId}/section/${sectionId}/assignment/${assignmentId}/submissions/`;
+            console.log('Fetching submissions from:', url);
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('Response Status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response Data:', data);
+                tableBody.innerHTML = ''; // Clear loading message
+                if (data.success) {
+                    if (data.submissions.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="4">No submissions yet.</td></tr>';
+                    } else {
+                        data.submissions.forEach(submission => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${submission.full_name || 'Unknown'}</td>
+                                <td><a href="${submission.file_url}" target="_blank">${submission.file_url ? 'View File' : 'No File'}</a></td>
+                                <td>${submission.submitted_at || 'N/A'}</td>
+                                <td>
+                                    <button class="reject-btn" data-submission-id="${submission.submission_id}" data-assignment-id="${assignmentId}">Reject</button>
+                                </td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                    }
+                } else {
+                    console.error('Error Message:', data.message);
+                    tableBody.innerHTML = `<tr><td colspan="4">Error: ${data.message}</td></tr>`;
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                tableBody.innerHTML = '<tr><td colspan="4">Error loading submissions. Please try again.</td></tr>';
+                alert('An error occurred while fetching submissions: ' + error.message);
+            });
+        });
+    });
+
+    // Handle reject button clicks
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('reject-btn')) {
+            const submissionId = event.target.getAttribute('data-submission-id');
+            const assignmentId = event.target.getAttribute('data-assignment-id');
+            if (!submissionId || !assignmentId) {
+                console.error('Error: submissionId or assignmentId is missing.', { submissionId, assignmentId });
+                alert('Error: Unable to reject submission due to missing information.');
+                return;
+            }
+
+            const url = `/teacher/class/${classroomId}/section/${sectionId}/assignment/${assignmentId}/reject-submission/${submissionId}/`;
+            if (confirm('Are you sure you want to reject this submission?')) {
+                console.log('Rejecting submission at:', url);
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    console.log('Reject Response Status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Submission rejected successfully.');
+                        // Refresh the submissions list
+                        document.querySelector(`.student-list-btn[data-assignment-id="${assignmentId}"]`).click();
+                    } else {
+                        console.error('Reject Error Message:', data.message);
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Reject Fetch Error:', error);
+                    alert('An error occurred while rejecting the submission: ' + error.message);
+                });
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,14 +1,18 @@
-# student/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from account.models import User
-from .forms import StudentProfileForm
-from .models import StudentClassroom
-from teacher.models import Classroom, Section, Resource  # Add Resource model
+from .forms import StudentProfileForm, StudentAssignmentSubmissionForm
+from .models import StudentClassroom, StudentAssignmentSubmission
+from .models import (
+    StudentAssignmentSubmission,
+    Assignment
+)
+from teacher.models import Classroom, Section, Resource
 import json
+from django.utils import timezone
 
 @login_required
 def dashboard(request):
@@ -69,11 +73,86 @@ def view_resources(request, class_id, section_id):
     student_class = get_object_or_404(StudentClassroom, student=request.user, joined_class_id=class_id)
     class_detail = student_class.joined_class
     section = get_object_or_404(Section, id=section_id, classroom=class_detail)
-    resources = Resource.objects.filter(section=section)  # Fetch resources for the section
+    resources = Resource.objects.filter(section=section)
     return render(request, 'student/view_resource.html', {
         'class_obj': class_detail,
         'section': section,
         'resources': resources
+    })
+
+@login_required
+def view_assignments(request, class_id, section_id):
+    student_class = get_object_or_404(StudentClassroom, student=request.user, joined_class_id=class_id)
+    class_detail = student_class.joined_class
+    section = get_object_or_404(Section, id=section_id, classroom=class_detail)
+    assignments = Assignment.objects.filter(section=section)
+    form_error = None
+    assignments_data = []
+    for assignment in assignments:
+        submission = StudentAssignmentSubmission.objects.filter(
+            student=request.user, assignment=assignment
+        ).first()
+        assignments_data.append({
+            'assignment': assignment,
+            'submission': submission
+        })
+    if request.method == 'POST':
+        form = StudentAssignmentSubmissionForm(request.POST, request.FILES)
+        if form.is_valid():
+            assignment_id = request.POST.get('assignment_id')
+            assignment = get_object_or_404(Assignment, id=assignment_id, section=section)
+            submission, created = StudentAssignmentSubmission.objects.get_or_create(
+                student=request.user,
+                assignment=assignment,
+                defaults={'file': form.cleaned_data['file']}
+            )
+            if not created:
+                submission.file = form.cleaned_data['file']
+                submission.submitted_at = timezone.now()
+                submission.save()
+            messages.success(request, "Assignment submitted successfully.")
+            return redirect('student:view_assignments', class_id=class_id, section_id=section_id)
+        else:
+            form_error = "Error submitting assignment. Please check the file."
+    else:
+        form = StudentAssignmentSubmissionForm()
+    return render(request, 'student/view_assignments.html', {
+        'class_obj': class_detail,
+        'section': section,
+        'assignments_data': assignments_data,
+        'form': form,
+        'form_error': form_error
+    })
+
+@login_required
+def manage_submission(request, class_id, section_id, assignment_id):
+    student_class = get_object_or_404(StudentClassroom, student=request.user, joined_class_id=class_id)
+    class_detail = student_class.joined_class
+    section = get_object_or_404(Section, id=section_id, classroom=class_detail)
+    assignment = get_object_or_404(Assignment, id=assignment_id, section=section)
+    submission = get_object_or_404(StudentAssignmentSubmission, student=request.user, assignment=assignment)
+    if request.method == 'POST':
+        if 'delete' in request.POST:
+            submission.delete()
+            messages.success(request, "Submission deleted successfully.")
+            return redirect('student:view_assignments', class_id=class_id, section_id=section_id)
+        form = StudentAssignmentSubmissionForm(request.POST, request.FILES)
+        if form.is_valid():
+            submission.file = form.cleaned_data['file']
+            submission.submitted_at = timezone.now()
+            submission.save()
+            messages.success(request, "Submission updated successfully.")
+            return redirect('student:view_assignments', class_id=class_id, section_id=section_id)
+        else:
+            messages.error(request, "Error updating submission. Please check the file.")
+    else:
+        form = StudentAssignmentSubmissionForm()
+    return render(request, 'student/manage_submission.html', {
+        'class_obj': class_detail,
+        'section': section,
+        'assignment': assignment,
+        'submission': submission,
+        'form': form
     })
 
 @csrf_exempt

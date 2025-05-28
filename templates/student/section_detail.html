@@ -111,7 +111,7 @@
                 <h3>Resources</h3>
                 <p>Access study materials, documents, and links for this section.</p>
             </div>
-            <div class="card" onclick="window.location.href='#'">
+            <div class="card" onclick="window.location.href='{% url 'student:view_assignments' class_id=class_obj.id section_id=section.id %}'">
                 <div class="card-icon">📝</div>
                 <h3>Assignments</h3>
                 <p>View and submit your assignments for this section.</p>

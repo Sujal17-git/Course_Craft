@@ -1,4 +1,3 @@
-# teacher/urls.py
 from django.urls import path
 from . import views
 
@@ -16,4 +15,9 @@ urlpatterns = [
     path('class/<int:class_id>/delete/', views.delete_class, name='delete_class'),
     path('class/<int:class_id>/section/<int:section_id>/manage-resource/', views.manage_resource, name='manage_resource'),
     path('class/<int:class_id>/section/<int:section_id>/delete-resource/<int:resource_id>/', views.delete_resource, name='delete_resource'),
+    path('class/<int:class_id>/section/<int:section_id>/manage-assignment/<int:assignment_id>/', views.manage_assignment, name='manage_assignment'),
+    path('class/<int:class_id>/section/<int:section_id>/delete-assignment/<int:assignment_id>/', views.delete_assignment, name='delete_assignment'),
+    path('class/<int:class_id>/section/<int:section_id>/add-assignment/', views.add_assignment, name='add_assignment'),
+    path('class/<int:class_id>/section/<int:section_id>/assignment/<int:assignment_id>/submissions/', views.get_assignment_submissions, name='get_assignment_submissions'),
+    path('class/<int:class_id>/section/<int:section_id>/assignment/<int:assignment_id>/reject-submission/<int:submission_id>/', views.reject_submission, name='reject_submission'),
 ]

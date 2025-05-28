@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
-from teacher.models import Classroom  # Assuming your Class model is in teacher app
+from teacher.models import Classroom, Assignment
+from django.core.validators import FileExtensionValidator
 
 class StudentClassroom(models.Model):
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -12,3 +13,20 @@ class StudentClassroom(models.Model):
 
     def __str__(self):
         return f"{self.student.username} joined {self.joined_class.class_name}"
+
+class StudentAssignmentSubmission(models.Model):
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions')
+    file = models.FileField(
+        upload_to='submissions/%Y/%m/%d/',
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'html', 'csv', 'jpg', 'jpeg', 'png', 'gif', 'svg', 'zip', 'rar', '7z'])],
+        blank=True,
+        null=True
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'assignment')
+
+    def __str__(self):
+        return f"{self.student.username}'s submission for {self.assignment.title}"
