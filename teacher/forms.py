@@ -1,6 +1,8 @@
 from django import forms
 from account.models import User
-from .models import Section, Resource, Assignment
+from .models import Section, Resource, Assignment, Poll, PollOption
+from django.utils import timezone
+import pytz
 
 class TeacherProfileForm(forms.ModelForm):
     class Meta:
@@ -57,3 +59,50 @@ class AssignmentForm(forms.ModelForm):
         if not title:
             raise forms.ValidationError("A title is required for the assignment.")
         return cleaned_data
+
+class PollForm(forms.ModelForm):
+    option1 = forms.CharField(max_length=100, required=True, label="Option 1")
+    option2 = forms.CharField(max_length=100, required=True, label="Option 2")
+    option3 = forms.CharField(max_length=100, required=False, label="Option 3")
+    option4 = forms.CharField(max_length=100, required=False, label="Option 4")
+    option5 = forms.CharField(max_length=100, required=False, label="Option 5")
+    deadline = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        label="Deadline"
+    )
+
+    class Meta:
+        model = Poll
+        fields = ['question', 'deadline']
+
+    def clean_deadline(self):
+        deadline = self.cleaned_data.get('deadline')
+        ist = pytz.timezone('Asia/Kolkata')
+        # Convert naive datetime (from form input) to IST
+        if not timezone.is_aware(deadline):
+            deadline = ist.localize(deadline)
+        # Compare with current time in IST
+        if deadline <= timezone.now().astimezone(ist):
+            raise forms.ValidationError("Deadline must be in the future.")
+        return deadline
+
+    def save(self, commit=True, section=None, user=None):
+        poll = super().save(commit=False)
+        if section:
+            poll.section = section
+        if user:
+            poll.created_by = user
+        if commit:
+            poll.save()
+            # Save poll options
+            options = [
+                self.cleaned_data.get('option1'),
+                self.cleaned_data.get('option2'),
+                self.cleaned_data.get('option3'),
+                self.cleaned_data.get('option4'),
+                self.cleaned_data.get('option5'),
+            ]
+            for option_text in options:
+                if option_text:  # Only save non-empty options
+                    PollOption.objects.create(poll=poll, text=option_text)
+        return poll

@@ -1,0 +1,198 @@
+{% extends 'student/base.html' %}
+{% load tz %}
+{% block title %}Answer Polls - {{ section.name }} - {{ class_obj.class_name }} - Course Craft{% endblock %}
+
+{% block content %}
+<style>
+    .poll-container {
+        max-width: 90%;
+        margin: 0 auto;
+        padding: 40px;
+        background: linear-gradient(145deg, #f0f4f8, #e0e7ff);
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        animation: fadeIn 0.7s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .poll-hero {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), var(--secondary-blue, #3b82f6));
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        color: white;
+        font-weight: 800;
+        font-size: 2.3rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        margin-bottom: 2.5rem;
+        overflow: hidden;
+    }
+
+    .poll-hero::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.2)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,144C960,149,1056,139,1152,122.7C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+        background-size: cover;
+        animation: wave 8s linear infinite;
+    }
+
+    .poll-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .poll-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .poll-card h3 {
+        color: var(--primary-blue, #1e3a8a);
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .poll-card p {
+        color: #4b5563;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .poll-card .status {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    .poll-card .status.active {
+        color: #16a34a;
+    }
+
+    .poll-card .btn {
+        background: var(--secondary-blue, #3b82f6);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        margin-top: 1rem;
+        display: inline-block;
+    }
+
+    .poll-card .btn:hover {
+        background: var(--primary-blue, #1e3a8a);
+    }
+
+    .poll-card .btn:disabled {
+        background: #d1d5db;
+        cursor: not-allowed;
+    }
+
+    .poll-card .radio-options {
+        margin: 1rem 0;
+    }
+
+    .poll-card .radio-options label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        color: #4b5563;
+    }
+
+    .alert {
+        padding: 15px;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        color: white;
+    }
+
+    .alert-success {
+        background: #16a34a;
+    }
+
+    .alert-danger {
+        background: #dc2626;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes wave {
+        0% { background-position-x: 0; }
+        100% { background-position-x: 1440px; }
+    }
+
+    @media (max-width: 768px) {
+        .poll-container { padding: 20px; }
+        .poll-hero { font-size: 1.7rem; padding: 15px; }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="poll-container">
+        <div class="poll-hero">Answer Polls</div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% if form_error %}
+            <div class="alert alert-danger">{{ form_error }}</div>
+        {% endif %}
+        <div class="poll-list">
+            {% for data in polls_data %}
+                <div class="poll-card">
+                    <h3>{{ data.poll.question }}</h3>
+                    {% timezone "Asia/Kolkata" %}
+                    <p><strong>Deadline:</strong> {{ data.poll.deadline|date:"Y-m-d H:i:s T" }}</p>
+                    {% endtimezone %}
+                    <p><strong>Status:</strong> <span class="status {% if data.poll.is_active %}active{% endif %}">
+                        {% if data.poll.is_active %}Active{% else %}Expired{% endif %}
+                    </span></p>
+                    {% if data.response %}
+                        <p><strong>Your Vote:</strong> {{ data.response.option.text }}</p>
+                    {% endif %}
+                    {% if data.poll.is_active and data.form %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="poll_id" value="{{ data.poll.id }}">
+                            <div class="radio-options">
+                                {{ data.form.option }}
+                            </div>
+                            <button type="submit" class="btn">
+                                {% if data.response %}Update Vote{% else %}Submit Vote{% endif %}
+                            </button>
+                        </form>
+                    {% else %}
+                        <ul>
+                            {% for option in data.poll.options.all %}
+                                <li>{{ option.text }} ({{ option.vote_count }} votes)</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p>No polls available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

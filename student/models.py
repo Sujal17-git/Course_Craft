@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from teacher.models import Classroom, Assignment
+from teacher.models import Classroom, Assignment, Poll, PollOption
 from django.core.validators import FileExtensionValidator
 
 class StudentClassroom(models.Model):
@@ -30,3 +30,15 @@ class StudentAssignmentSubmission(models.Model):
 
     def __str__(self):
         return f"{self.student.username}'s submission for {self.assignment.title}"
+
+class PollResponse(models.Model):
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='responses')
+    option = models.ForeignKey(PollOption, on_delete=models.CASCADE)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'poll')
+
+    def __str__(self):
+        return f"{self.student.username}'s vote for {self.poll.question}: {self.option.text}"

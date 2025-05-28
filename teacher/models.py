@@ -56,3 +56,26 @@ class Assignment(models.Model):
 
     def __str__(self):
         return self.title
+
+class Poll(models.Model):
+    question = models.CharField(max_length=200)
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='polls')
+    created_at = models.DateTimeField(auto_now_add=True)
+    deadline = models.DateTimeField()
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.question
+
+    @property
+    def is_active(self):
+        from django.utils import timezone
+        return self.deadline > timezone.now()
+
+class PollOption(models.Model):
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='options')
+    text = models.CharField(max_length=100)
+    vote_count = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return self.text

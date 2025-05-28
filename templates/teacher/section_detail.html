@@ -1,5 +1,5 @@
 {% extends 'teacher/base.html' %}
-{% block title %}{{ section.name }} - {{ classroom.class_name }}{% endblock %}
+{% block title %}{{ section.name }} - {{ class_obj.class_name }} - Course Craft{% endblock %}
 
 {% block content %}
 <style>
@@ -16,7 +16,7 @@
     }
 
     .section-hero {
-        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a) 0%, var(--secondary-blue, #3b82f6) 100%);
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), var(--secondary-blue, #3b82f6));
         padding: 25px;
         border-radius: 14px;
         text-align: center;
@@ -42,34 +42,47 @@
         animation: wave 8s linear infinite;
     }
 
-    .action-grid {
+    .card-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 25px;
-        margin-bottom: 2.5rem;
+        gap: 1.5rem;
+        margin-top: 2rem;
     }
 
-    .action-btn {
-        background: linear-gradient(90deg, var(--secondary-blue, #3b82f6), #ec4899);
-        border: none;
-        padding: 14px 30px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        border-radius: 50px;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
         cursor: pointer;
     }
 
-    .action-btn:hover {
-        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), #db2777);
-        transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .card h3 {
+        color: var(--primary-blue, #1e3a8a);
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .card p {
+        color: #4b5563;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .card-icon {
+        font-size: 2.5rem;
+        color: var(--secondary-blue, #3b82f6);
+        margin-bottom: 0.5rem;
     }
 
     @keyframes fadeIn {
@@ -85,19 +98,35 @@
     @media (max-width: 768px) {
         .section-container { padding: 20px; }
         .section-hero { font-size: 1.7rem; padding: 15px; }
-        .action-grid { grid-template-columns: 1fr; }
-        .action-btn { padding: 12px 24px; font-size: 1rem; }
+        .card-grid { grid-template-columns: 1fr; }
     }
 </style>
 
-<div class="section-container">
-    <div class="section-hero">{{ section.name }}</div>
-
-    <div class="action-grid">
-        <a href="{% url 'teacher:manage_resource' class_id=classroom.id section_id=section.id %}" class="action-btn"><i class="fas fa-book-open"></i> Resources</a>
-        <a href="{% url 'teacher:add_assignment' class_id=classroom.id section_id=section.id %}" class="action-btn"><i class="fas fa-tasks"></i> Assignments</a>
-        <button class="action-btn"><i class="fas fa-poll"></i> Poll</button>
-        <button class="action-btn"><i class="fas fa-question-circle"></i> Quiz</button>
+<div class="container py-4">
+    <div class="section-container">
+        <div class="section-hero">{{ section.name }}</div>
+        <div class="card-grid">
+            <div class="card" onclick="window.location.href='{% url 'teacher:manage_resource' class_id=classroom.id section_id=section.id %}'">
+                <div class="card-icon">📚</div>
+                <h3>Resources</h3>
+                <p>Access study materials, documents, and links for this section.</p>
+            </div>
+            <div class="card" onclick="window.location.href='{% url 'teacher:add_assignment' class_id=classroom.id section_id=section.id %}'">
+                <div class="card-icon">📝</div>
+                <h3>Assignments</h3>
+                <p>View and submit your assignments for this section.</p>
+            </div>
+            <div class="card" onclick="window.location.href='{% url 'teacher:add_poll' class_id=classroom.id section_id=section.id %}'">
+                <div class="card-icon">📊</div>
+                <h3>Polls</h3>
+                <p>Participate in polls and share your opinions.</p>
+            </div>
+            <div class="card" onclick="window.location.href='#'">
+                <div class="card-icon">❓</div>
+                <h3>Quizzes</h3>
+                <p>Test your knowledge with interactive quizzes.</p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

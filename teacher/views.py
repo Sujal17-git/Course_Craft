@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from account.models import User
-from .forms import TeacherProfileForm, SectionForm, ResourceForm, AssignmentForm
-from .models import Classroom, Section, Resource, Assignment
+from .forms import TeacherProfileForm, SectionForm, ResourceForm, AssignmentForm, PollForm
+from .models import Classroom, Section, Resource, Assignment, Poll
 from student.models import StudentClassroom, StudentAssignmentSubmission
 import json
 
@@ -113,6 +113,39 @@ def add_assignment(request, class_id, section_id):
         'form': form,
         'form_error': form_error,
     })
+
+@login_required
+def add_poll(request, class_id, section_id):
+    classroom = get_object_or_404(Classroom, id=class_id, teacher=request.user)
+    section = get_object_or_404(Section, id=section_id, classroom=classroom)
+    polls = section.polls.all().prefetch_related('options')
+    form_error = None
+    if request.method == 'POST':
+        form = PollForm(request.POST)
+        if form.is_valid():
+            form.save(commit=True, section=section, user=request.user)
+            return redirect('teacher:add_poll', class_id=class_id, section_id=section_id)
+        else:
+            form_error = "Error adding poll. Please check the form."
+    else:
+        form = PollForm()
+    return render(request, 'teacher/add_poll.html', {
+        'classroom': classroom,
+        'section': section,
+        'polls': polls,
+        'form': form,
+        'form_error': form_error,
+    })
+
+@login_required
+def delete_poll(request, class_id, section_id, poll_id):
+    classroom = get_object_or_404(Classroom, id=class_id, teacher=request.user)
+    section = get_object_or_404(Section, id=section_id, classroom=classroom)
+    poll = get_object_or_404(Poll, id=poll_id, section=section)
+    if request.method == 'POST':
+        poll.delete()
+        return redirect('teacher:add_poll', class_id=class_id, section_id=section_id)
+    return redirect('teacher:add_poll', class_id=class_id, section_id=section_id)
 
 @login_required
 def get_students(request, class_id):

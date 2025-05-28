@@ -116,7 +116,7 @@
                 <h3>Assignments</h3>
                 <p>View and submit your assignments for this section.</p>
             </div>
-            <div class="card" onclick="window.location.href='#'">
+            <div class="card" onclick="window.location.href='{% url 'student:answer_poll' class_id=class_obj.id section_id=section.id %}'">
                 <div class="card-icon">📊</div>
                 <h3>Polls</h3>
                 <p>Participate in polls and share your opinions.</p>

@@ -4,13 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from account.models import User
-from .forms import StudentProfileForm, StudentAssignmentSubmissionForm
-from .models import StudentClassroom, StudentAssignmentSubmission
-from .models import (
-    StudentAssignmentSubmission,
-    Assignment
-)
-from teacher.models import Classroom, Section, Resource
+from .forms import StudentProfileForm, StudentAssignmentSubmissionForm, PollResponseForm
+from .models import StudentClassroom, StudentAssignmentSubmission, PollResponse
+from teacher.models import Classroom, Section, Resource, Assignment, Poll
 import json
 from django.utils import timezone
 
@@ -153,6 +149,66 @@ def manage_submission(request, class_id, section_id, assignment_id):
         'assignment': assignment,
         'submission': submission,
         'form': form
+    })
+
+@login_required
+def answer_poll(request, class_id, section_id):
+    student_class = get_object_or_404(StudentClassroom, student=request.user, joined_class_id=class_id)
+    class_detail = student_class.joined_class
+    section = get_object_or_404(Section, id=section_id, classroom=class_detail)
+    polls = Poll.objects.filter(section=section).prefetch_related('options', 'responses')
+    form_error = None
+    polls_data = []
+    
+    for poll in polls:
+        response = PollResponse.objects.filter(student=request.user, poll=poll).first()
+        form = PollResponseForm(poll=poll, instance=response) if poll.is_active else None
+        polls_data.append({
+            'poll': poll,
+            'response': response,
+            'form': form
+        })
+
+    if request.method == 'POST':
+        poll_id = request.POST.get('poll_id')
+        poll = get_object_or_404(Poll, id=poll_id, section=section)
+        if not poll.is_active:
+            messages.error(request, "This poll has expired.")
+            return redirect('student:answer_poll', class_id=class_id, section_id=section_id)
+        
+        form = PollResponseForm(request.POST, poll=poll)
+        if form.is_valid():
+            # Decrement vote count of previous option if updating
+            existing_response = PollResponse.objects.filter(student=request.user, poll=poll).first()
+            if existing_response:
+                existing_response.option.vote_count -= 1
+                existing_response.option.save()
+            
+            # Create or update response
+            response, created = PollResponse.objects.get_or_create(
+                student=request.user,
+                poll=poll,
+                defaults={'option': form.cleaned_data['option']}
+            )
+            if not created:
+                response.option = form.cleaned_data['option']
+                response.submitted_at = timezone.now()
+                response.save()
+            
+            # Increment vote count of selected option
+            form.cleaned_data['option'].vote_count += 1
+            form.cleaned_data['option'].save()
+            
+            messages.success(request, "Your vote has been recorded.")
+            return redirect('student:answer_poll', class_id=class_id, section_id=section_id)
+        else:
+            form_error = "Please select an option."
+    
+    return render(request, 'student/answer_poll.html', {
+        'class_obj': class_detail,
+        'section': section,
+        'polls_data': polls_data,
+        'form_error': form_error
     })
 
 @csrf_exempt

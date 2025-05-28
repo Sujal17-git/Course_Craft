@@ -1,0 +1,219 @@
+{% extends 'teacher/base.html' %}
+{% load tz %}
+{% block title %}Add Poll - {{ section.name }} - {{ classroom.class_name }} - Course Craft{% endblock %}
+
+{% block content %}
+<style>
+    .poll-container {
+        max-width: 90%;
+        margin: 0 auto;
+        padding: 40px;
+        background: linear-gradient(145deg, #f0f4f8, #e0e7ff);
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        animation: fadeIn 0.7s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .poll-hero {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), var(--secondary-blue, #3b82f6));
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        color: white;
+        font-weight: 800;
+        font-size: 2.3rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        margin-bottom: 2.5rem;
+        overflow: hidden;
+    }
+
+    .poll-hero::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.2)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,144C960,149,1056,139,1152,122.7C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+        background-size: cover;
+        animation: wave 8s linear infinite;
+    }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 2rem;
+    }
+
+    .form-container h3 {
+        color: var(--primary-blue, #1e3a8a);
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .form-container .form-control {
+        margin-bottom: 1rem;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+    }
+
+    .form-container .btn {
+        background: var(--secondary-blue, #3b82f6);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .form-container .btn:hover {
+        background: var(--primary-blue, #1e3a8a);
+    }
+
+    .poll-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .poll-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .poll-card h3 {
+        color: var(--primary-blue, #1e3a8a);
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .poll-card p {
+        color: #4b5563;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .poll-card .status {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    .poll-card .status.active {
+        color: #16a34a;
+    }
+
+    .delete-btn {
+        background: #dc2626;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        margin-top: 1rem;
+        display: inline-block;
+    }
+
+    .delete-btn:hover {
+        background: #b91c1c;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes wave {
+        0% { background-position-x: 0; }
+        100% { background-position-x: 1440px; }
+    }
+
+    @media (max-width: 768px) {
+        .poll-container { padding: 20px; }
+        .poll-hero { font-size: 1.7rem; padding: 15px; }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="poll-container">
+        <div class="poll-hero">Manage Polls</div>
+        <div class="form-container">
+            <h3>Create New Poll</h3>
+            {% if form_error %}
+                <div class="alert alert-danger">{{ form_error }}</div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-control">
+                    <label for="{{ form.question.id_for_label }}">Question</label>
+                    {{ form.question }}
+                </div>
+                <div class="form-control">
+                    <label for="{{ form.option1.id_for_label }}">Option 1</label>
+                    {{ form.option1 }}
+                </div>
+                <div class="form-control">
+                    <label for="{{ form.option2.id_for_label }}">Option 2</label>
+                    {{ form.option2 }}
+                </div>
+                <div class="form-control">
+                    <label for="{{ form.option3.id_for_label }}">Option 3 (Optional)</label>
+                    {{ form.option3 }}
+                </div>
+                <div class="form-control">
+                    <label for="{{ form.option4.id_for_label }}">Option 4 (Optional)</label>
+                    {{ form.option4 }}
+                </div>
+                <div class="form-control">
+                    <label for="{{ form.option5.id_for_label }}">Option 5 (Optional)</label>
+                    {{ form.option5 }}
+                </div>
+                <div class="form-control">
+                    <label for="{{ form.deadline.id_for_label }}">Deadline (IST)</label>
+                    {{ form.deadline }}
+                </div>
+                <button type="submit" class="btn">Create Poll</button>
+            </form>
+        </div>
+        <div class="poll-list">
+            {% for poll in polls %}
+                <div class="poll-card">
+                    <h3>{{ poll.question }}</h3>
+                    {% timezone "Asia/Kolkata" %}
+                    <p><strong>Deadline:</strong> {{ poll.deadline|date:"Y-m-d H:i:s T" }}</p>
+                    {% endtimezone %}
+                    <p><strong>Status:</strong> <span class="status {% if poll.is_active %}active{% endif %}">
+                        {% if poll.is_active %}Active{% else %}Expired{% endif %}
+                    </span></p>
+                    <ul>
+                        {% for option in poll.options.all %}
+                            <li>{{ option.text }} ({{ option.vote_count }} votes)</li>
+                        {% endfor %}
+                    </ul>
+                    <form method="post" action="{% url 'teacher:delete_poll' class_id=classroom.id section_id=section.id poll_id=poll.id %}" onsubmit="return confirm('Are you sure you want to delete this poll?');">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-btn">Delete Poll</button>
+                    </form>
+                </div>
+            {% empty %}
+                <p>No polls available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
