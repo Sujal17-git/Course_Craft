@@ -3,23 +3,188 @@
 {% block title %}Add Poll - {{ section.name }} - {{ classroom.class_name }} - Course Craft{% endblock %}
 
 {% block content %}
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 <style>
-    @keyframes wave {
-        0% { background-position-x: 0; }
-        100% { background-position-x: 1440px; }
+    /* Custom Color Scheme */
+    :root {
+        --primary-color: #4a00e0;
+        --secondary-color: #8e2de2;
+        --accent-color: #ff6f61;
+        --text-dark: #2c3e50;
+        --text-light: #ecf0f1;
     }
+
+    /* Background and Container */
+    .poll-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 2rem 1rem;
+        animation: fadeIn 1s ease-in;
+    }
+
+    /* Hero Section */
+    .poll-hero {
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        color: var(--text-light);
+        padding: 2.5rem;
+        border-radius: 0.75rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.8s ease-out;
+    }
+
     .poll-hero::before {
         content: '';
         position: absolute;
-        bottom: 0;
+        top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.2)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,144C960,149,1056,139,1152,122.7C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
         background-size: cover;
-        animation: wave 8s linear infinite;
+        animation: wave 10s linear infinite;
+        z-index: 0;
+    }
+
+    .poll-hero h1 {
+        position: relative;
+        z-index: 1;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    /* Animations */
+    @keyframes wave {
+        0% { background-position-x: 0; }
+        100% { background-position-x: 1440px; }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Form Styling */
+    .poll-form-card {
+        background: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        animation: slideUp 0.8s ease-out;
+    }
+
+    .poll-form-card .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .poll-form-card .form-control {
+        border: 2px solid #e0e0e0;
+        border-radius: 0.5rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .poll-form-card .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(74, 0, 224, 0.25);
+    }
+
+    .poll-form-card .btn-primary {
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .poll-form-card .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(74, 0, 224, 0.4);
+    }
+
+    /* Poll Card Styling */
+    .poll-card {
+        background: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+        animation: slideUp 0.8s ease-out;
+    }
+
+    .poll-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .poll-card .btn-option {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        width: 100%;
+        text-align: left;
+        transition: background 0.3s, border-color 0.3s;
+    }
+
+    .poll-card .btn-option:hover {
+        background: #e9ecef;
+        border-color: var(--primary-color);
+    }
+
+    /* Table Styling */
+    .student-table {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    .student-table th {
+        background: var(--primary-color);
+        color: var(--text-light);
+    }
+
+    .student-table tr:hover {
+        background: #f1f3f5;
+    }
+
+    /* Delete Button */
+    .btn-delete {
+        background: var(--accent-color);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(255, 111, 97, 0.4);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .poll-hero h1 {
+            font-size: 1.8rem;
+        }
+        .poll-form-card, .poll-card {
+            padding: 1.5rem;
+        }
     }
 </style>
 
@@ -27,123 +192,128 @@
     function toggleStudentList(optionId) {
         const studentList = document.getElementById(`student-list-${optionId}`);
         if (studentList) {
-            studentList.classList.toggle('hidden');
+            studentList.classList.toggle('d-none');
         }
     }
 </script>
 
-<div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    <div class="bg-gradient-to-br from-gray-50 to-indigo-100 rounded-2xl shadow-xl p-6 sm:p-8 relative overflow-hidden">
-        <div class="poll-hero relative bg-gradient-to-r from-indigo-900 to-blue-600 text-white text-2xl sm:text-3xl font-extrabold uppercase tracking-wide text-center py-6 rounded-xl mb-8">
-            Manage Polls
+<div class="poll-container">
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="poll-hero text-center mb-5">
+            <h1>Manage Polls</h1>
         </div>
 
         <!-- Form for Creating New Poll -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h3 class="text-xl sm:text-2xl font-semibold text-indigo-900 mb-4">Create New Poll</h3>
+        <div class="poll-form-card mb-5">
+            <h3 class="h4 mb-4">Create New Poll</h3>
             {% if form_error %}
-                <div class="bg-red-500 text-white p-4 rounded-lg mb-4">{{ form_error }}</div>
+                <div class="alert alert-danger" role="alert">{{ form_error }}</div>
             {% endif %}
-            <form method="post" class="space-y-4">
+            <form method="post">
                 {% csrf_token %}
-                <div>
-                    <label for="{{ form.question.id_for_label }}" class="block text-sm font-medium text-gray-700">Question</label>
+                <div class="mb-3">
+                    <label for="{{ form.question.id_for_label }}" class="form-label">Question</label>
                     {{ form.question }}
                 </div>
-                <div>
-                    <label for="{{ form.option1.id_for_label }}" class="block text-sm font-medium text-gray-700">Option 1</label>
+                <div class="mb-3">
+                    <label for="{{ form.option1.id_for_label }}" class="form-label">Option 1</label>
                     {{ form.option1 }}
                 </div>
-                <div>
-                    <label for="{{ form.option2.id_for_label }}" class="block text-sm font-medium text-gray-700">Option 2</label>
+                <div class="mb-3">
+                    <label for="{{ form.option2.id_for_label }}" class="form-label">Option 2</label>
                     {{ form.option2 }}
                 </div>
-                <div>
-                    <label for="{{ form.option3.id_for_label }}" class="block text-sm font-medium text-gray-700">Option 3 (Optional)</label>
+                <div class="mb-3">
+                    <label for="{{ form.option3.id_for_label }}" class="form-label">Option 3 (Optional)</label>
                     {{ form.option3 }}
                 </div>
-                <div>
-                    <label for="{{ form.option4.id_for_label }}" class="block text-sm font-medium text-gray-700">Option 4 (Optional)</label>
+                <div class="mb-3">
+                    <label for="{{ form.option4.id_for_label }}" class="form-label">Option 4 (Optional)</label>
                     {{ form.option4 }}
                 </div>
-                <div>
-                    <label for="{{ form.option5.id_for_label }}" class="block text-sm font-medium text-gray-700">Option 5 (Optional)</label>
+                <div class="mb-3">
+                    <label for="{{ form.option5.id_for_label }}" class="form-label">Option 5 (Optional)</label>
                     {{ form.option5 }}
                 </div>
-                <div>
-                    <label for="{{ form.deadline.id_for_label }}" class="block text-sm font-medium text-gray-700">Deadline (IST)</label>
+                <div class="mb-3">
+                    <label for="{{ form.deadline.id_for_label }}" class="form-label">Deadline (IST)</label>
                     {{ form.deadline }}
                 </div>
-                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-900 transition-colors duration-300">Create Poll</button>
+                <button type="submit" class="btn btn-primary">Create Poll</button>
             </form>
         </div>
 
         <!-- Poll List -->
-        <div class="grid gap-6">
+        <div class="row">
             {% for poll in polls %}
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg sm:text-xl font-semibold text-indigo-900 mb-2">{{ poll.question }}</h3>
-                    {% timezone "Asia/Kolkata" %}
-                    <p class="text-gray-600"><strong>Deadline:</strong> {{ poll.deadline|date:"Y-m-d H:i:s T" }}</p>
-                    {% endtimezone %}
-                    <p class="text-gray-600"><strong>Status:</strong> 
-                        <span class="{% if poll.is_active %}text-green-600{% else %}text-red-600{% endif %} font-semibold">
-                            {% if poll.is_active %}Active{% else %}Expired{% endif %}
-                        </span>
-                    </p>
-                    {% if poll.is_active %}
-                        <p class="text-gray-600 mt-2"><strong>Current Votes:</strong></p>
-                        <ul class="list-disc pl-5 text-gray-600">
-                            {% for option in poll.options.all %}
-                                <li>{{ option.text }} ({{ option.vote_count }} votes)</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-gray-600 mt-2"><strong>Results:</strong></p>
-                        <div class="space-y-2">
-                            {% for option in poll.options.all %}
-                                <button 
-                                    onclick="toggleStudentList({{ option.id }})" 
-                                    class="w-full sm:w-auto bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-300 text-left"
-                                >
-                                    {{ option.text }}: {{ option.vote_count }} votes
-                                </button>
-                                <div class="hidden mt-2 bg-gray-50 rounded-lg p-4" id="student-list-{{ option.id }}">
-                                    <table class="min-w-full divide-y divide-gray-200">
-                                        <thead class="bg-gray-100">
-                                            <tr>
-                                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Student Name</th>
-                                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Submitted At (IST)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-200">
-                                            {% for response in option.responses.all %}
-                                                <tr class="hover:bg-gray-50">
-                                                    <td class="px-4 py-2 text-sm text-gray-600">{{ response.student.full_name|default:response.student.username }}</td>
-                                                    <td class="px-4 py-2 text-sm text-gray-600">
-                                                        {% timezone "Asia/Kolkata" %}
-                                                            {{ response.submitted_at|date:"Y-m-d H:i:s T" }}
-                                                        {% endtimezone %}
-                                                    </td>
-                                                </tr>
-                                            {% empty %}
+                <div class="col-12 mb-4">
+                    <div class="poll-card">
+                        <h4 class="h5 mb-3">{{ poll.question }}</h4>
+                        {% timezone "Asia/Kolkata" %}
+                        <p class="text-muted"><strong>Deadline:</strong> {{ poll.deadline|date:"Y-m-d H:i:s T" }}</p>
+                        {% endtimezone %}
+                        <p class="text-muted"><strong>Status:</strong> 
+                            <span class="badge {% if poll.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if poll.is_active %}Active{% else %}Expired{% endif %}
+                            </span>
+                        </p>
+                        {% if poll.is_active %}
+                            <p class="text-muted mt-2"><strong>Current Votes:</strong></p>
+                            <ul class="list-group list-group-flush">
+                                {% for option in poll.options.all %}
+                                    <li class="list-group-item">{{ option.text }} ({{ option.vote_count }} votes)</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted mt-2"><strong>Results:</strong></p>
+                            <div>
+                                {% for option in poll.options.all %}
+                                    <button 
+                                        onclick="toggleStudentList({{ option.id }})" 
+                                        class="btn btn-option mb-2"
+                                    >
+                                        {{ option.text }}: {{ option.vote_count }} votes
+                                    </button>
+                                    <div class="d-none student-table" id="student-list-{{ option.id }}">
+                                        <table class="table table-hover">
+                                            <thead>
                                                 <tr>
-                                                    <td colspan="2" class="px-4 py-2 text-sm text-gray-600 text-center">No students voted for this option.</td>
+                                                    <th scope="col">Student Name</th>
+                                                    <th scope="col">Submitted At (IST)</th>
                                                 </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    <form method="post" action="{% url 'teacher:delete_poll' class_id=classroom.id section_id=section.id poll_id=poll.id %}" onsubmit="return confirm('Are you sure you want to delete this poll?');" class="mt-4">
-                        {% csrf_token %}
-                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-300">Delete Poll</button>
-                    </form>
+                                            </thead>
+                                            <tbody>
+                                                {% for response in option.responses.all %}
+                                                    <tr>
+                                                        <td>{{ response.student.full_name|default:response.student.username }}</td>
+                                                        <td>
+                                                            {% timezone "Asia/Kolkata" %}
+                                                                {{ response.submitted_at|date:"Y-m-d H:i:s T" }}
+                                                            {% endtimezone %}
+                                                        </td>
+                                                    </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="2" class="text-center">No students voted for this option.</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <form method="post" action="{% url 'teacher:delete_poll' class_id=classroom.id section_id=section.id poll_id=poll.id %}" onsubmit="return confirm('Are you sure you want to delete this poll?');" class="mt-3">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-delete">Delete Poll</button>
+                        </form>
+                    </div>
                 </div>
             {% empty %}
-                <p class="text-gray-600 text-center">No polls available.</p>
+                <div class="col-12">
+                    <p class="text-muted text-center">No polls available.</p>
+                </div>
             {% endfor %}
         </div>
     </div>

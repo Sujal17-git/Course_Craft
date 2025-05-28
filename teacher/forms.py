@@ -9,7 +9,7 @@ class TeacherProfileForm(forms.ModelForm):
         model = User
         fields = ['full_name', 'email', 'date_of_birth']
         widgets = {
-            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}),
+            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
 
 class SectionForm(forms.ModelForm):
@@ -17,7 +17,7 @@ class SectionForm(forms.ModelForm):
         model = Section
         fields = ['name']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 class ResourceForm(forms.ModelForm):
@@ -25,9 +25,9 @@ class ResourceForm(forms.ModelForm):
         model = Resource
         fields = ['title', 'resource_type', 'file', 'link']
         widgets = {
-            'resource_type': forms.Select(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}),
-            'file': forms.FileInput(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm'}),
-            'link': forms.URLInput(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}),
+            'resource_type': forms.Select(attrs={'class': 'form-control'}),
+            'file': forms.FileInput(attrs={'class': 'form-control'}),
+            'link': forms.URLInput(attrs={'class': 'form-control'}),
         }
 
     def clean(self):
@@ -51,9 +51,9 @@ class AssignmentForm(forms.ModelForm):
         model = Assignment
         fields = ['title', 'instructions', 'file']
         widgets = {
-            'instructions': forms.Textarea(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500', 'rows': 5}),
-            'file': forms.FileInput(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm'}),
-            'title': forms.TextInput(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}),
+            'instructions': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'file': forms.FileInput(attrs={'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
     def clean(self):
@@ -64,13 +64,13 @@ class AssignmentForm(forms.ModelForm):
         return cleaned_data
 
 class PollForm(forms.ModelForm):
-    option1 = forms.CharField(max_length=100, required=True, label="Option 1", widget=forms.TextInput(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}))
-    option2 = forms.CharField(max_length=100, required=True, label="Option 2", widget=forms.TextInput(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}))
-    option3 = forms.CharField(max_length=100, required=False, label="Option 3", widget=forms.TextInput(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}))
-    option4 = forms.CharField(max_length=100, required=False, label="Option 4", widget=forms.TextInput(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}))
-    option5 = forms.CharField(max_length=100, required=False, label="Option 5", widget=forms.TextInput(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}))
+    option1 = forms.CharField(max_length=100, required=True, label="Option 1", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    option2 = forms.CharField(max_length=100, required=True, label="Option 2", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    option3 = forms.CharField(max_length=100, required=False, label="Option 3", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    option4 = forms.CharField(max_length=100, required=False, label="Option 4", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    option5 = forms.CharField(max_length=100, required=False, label="Option 5", widget=forms.TextInput(attrs={'class': 'form-control'}))
     deadline = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}),
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
         label="Deadline (IST)"
     )
 
@@ -78,7 +78,7 @@ class PollForm(forms.ModelForm):
         model = Poll
         fields = ['question', 'deadline']
         widgets = {
-            'question': forms.TextInput(attrs={'class': 'mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500'}),
+            'question': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
     def clean_deadline(self):
