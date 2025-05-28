@@ -1,3 +1,4 @@
+
 from django.db import models
 from account.models import User
 from django.core.validators import FileExtensionValidator
@@ -74,6 +75,7 @@ class PollOption(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='options')
     text = models.CharField(max_length=100)
     vote_count = models.PositiveIntegerField(default=0)
+    responses = models.ManyToManyField('student.PollResponse', related_name='poll_option', blank=True)
 
     def __str__(self):
         return self.text

@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -182,6 +183,7 @@ def answer_poll(request, class_id, section_id):
             existing_response = PollResponse.objects.filter(student=request.user, poll=poll).first()
             if existing_response:
                 existing_response.option.vote_count -= 1
+                existing_response.option.responses.remove(existing_response)
                 existing_response.option.save()
             
             # Create or update response
@@ -195,9 +197,11 @@ def answer_poll(request, class_id, section_id):
                 response.submitted_at = timezone.now()
                 response.save()
             
-            # Increment vote count of selected option
-            form.cleaned_data['option'].vote_count += 1
-            form.cleaned_data['option'].save()
+            # Increment vote count and add to responses
+            selected_option = form.cleaned_data['option']
+            selected_option.vote_count += 1
+            selected_option.responses.add(response)
+            selected_option.save()
             
             messages.success(request, "Your vote has been recorded.")
             return redirect('student:answer_poll', class_id=class_id, section_id=section_id)
