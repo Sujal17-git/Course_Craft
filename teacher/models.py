@@ -1,6 +1,7 @@
 from django.db import models
 from account.models import User
 from django.core.validators import FileExtensionValidator
+from django.utils import timezone
 
 class Classroom(models.Model):
     class_name = models.CharField(max_length=100)
@@ -31,8 +32,7 @@ class Resource(models.Model):
         upload_to='resources/%Y/%m/%d/',
         blank=True,
         null=True,
-        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'html', 'csv',
- 'jpg', 'jpeg', 'png', 'gif', 'svg', 'zip', 'rar', '7z'])]
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'html', 'csv', 'jpg', 'jpeg', 'png', 'gif', 'svg', 'zip', 'rar', '7z'])]
     )
     link = models.URLField(blank=True, null=True)
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='resources')
@@ -48,8 +48,7 @@ class Assignment(models.Model):
         upload_to='assignments/%Y/%m/%d/',
         blank=True,
         null=True,
-        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'html', 'csv',
- 'jpg', 'jpeg', 'png', 'gif', 'svg', 'zip', 'rar', '7z'])]
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'html', 'csv', 'jpg', 'jpeg', 'png', 'gif', 'svg', 'zip', 'rar', '7z'])]
     )
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='assignments')
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -69,7 +68,6 @@ class Poll(models.Model):
 
     @property
     def is_active(self):
-        from django.utils import timezone
         return self.deadline > timezone.now()
 
 class PollOption(models.Model):

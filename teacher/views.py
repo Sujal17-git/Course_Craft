@@ -36,7 +36,7 @@ def create_class(request):
 
 @login_required
 def class_detail(request, class_id):
-    classroom = get_object_or_404(Classroom, id=class_id)
+    classroom = get_object_or_404(Classroom, id=class_id, teacher=request.user)
     sections = classroom.sections.all()
     if request.method == 'POST':
         form = SectionForm(request.POST)
@@ -56,7 +56,7 @@ def class_detail(request, class_id):
 @login_required
 def manage_profile(request):
     if not request.user.is_teacher:
-        return redirect('teacher:dashboard')
+        return redirect('student:dashboard')
     user = request.user
     if request.method == 'POST':
         form = TeacherProfileForm(request.POST, instance=user)
@@ -68,12 +68,15 @@ def manage_profile(request):
     return render(request, 'teacher/manage_profile.html', {'form': form})
 
 @csrf_exempt
+@login_required
 def add_section(request, class_id):
+    if not request.user.is_teacher:
+        return JsonResponse({"success": False, "message": "Unauthorized"}, status=403)
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             section_name = data.get("name")
-            classroom = Classroom.objects.get(id=class_id)
+            classroom = get_object_or_404(Classroom, id=class_id, teacher=request.user)
             new_section = Section.objects.create(name=section_name, classroom=classroom)
             return JsonResponse({"success": True, "section_name": new_section.name, "section_id": new_section.id})
         except Exception as e:
@@ -82,7 +85,7 @@ def add_section(request, class_id):
 
 @login_required
 def section_detail(request, class_id, section_id):
-    classroom = get_object_or_404(Classroom, id=class_id)
+    classroom = get_object_or_404(Classroom, id=class_id, teacher=request.user)
     section = get_object_or_404(Section, id=section_id, classroom=classroom)
     return render(request, 'teacher/section_detail.html', {
         'classroom': classroom,

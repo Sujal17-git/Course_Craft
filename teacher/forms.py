@@ -2,7 +2,6 @@ from django import forms
 from account.models import User
 from .models import Section, Resource, Assignment, Poll, PollOption
 from django.utils import timezone
-import pytz
 
 class TeacherProfileForm(forms.ModelForm):
     class Meta:
@@ -68,7 +67,7 @@ class PollForm(forms.ModelForm):
     option5 = forms.CharField(max_length=100, required=False, label="Option 5")
     deadline = forms.DateTimeField(
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-        label="Deadline"
+        label="Deadline (IST)"
     )
 
     class Meta:
@@ -77,12 +76,9 @@ class PollForm(forms.ModelForm):
 
     def clean_deadline(self):
         deadline = self.cleaned_data.get('deadline')
-        ist = pytz.timezone('Asia/Kolkata')
-        # Convert naive datetime (from form input) to IST
         if not timezone.is_aware(deadline):
-            deadline = ist.localize(deadline)
-        # Compare with current time in IST
-        if deadline <= timezone.now().astimezone(ist):
+            deadline = timezone.make_aware(deadline, timezone.get_default_timezone())
+        if deadline <= timezone.now():
             raise forms.ValidationError("Deadline must be in the future.")
         return deadline
 
@@ -94,7 +90,6 @@ class PollForm(forms.ModelForm):
             poll.created_by = user
         if commit:
             poll.save()
-            # Save poll options
             options = [
                 self.cleaned_data.get('option1'),
                 self.cleaned_data.get('option2'),
@@ -103,6 +98,6 @@ class PollForm(forms.ModelForm):
                 self.cleaned_data.get('option5'),
             ]
             for option_text in options:
-                if option_text:  # Only save non-empty options
+                if option_text:
                     PollOption.objects.create(poll=poll, text=option_text)
         return poll

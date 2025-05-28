@@ -1,4 +1,4 @@
-{% extends 'teacher/base.html' %}
+{% extends 'student/base.html' %}
 {% load tz %}
 {% block title %}Add Poll - {{ section.name }} - {{ classroom.class_name }} - Course Craft{% endblock %}
 
@@ -63,6 +63,8 @@
         padding: 10px;
         border-radius: 8px;
         border: 1px solid #d1d5db;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .form-container .btn {
@@ -133,6 +135,75 @@
         background: #b91c1c;
     }
 
+    .option-button {
+        display: inline-block;
+        background: #e5e7eb;
+        color: #1f2937;
+        padding: 8px 16px;
+        border-radius: 8px;
+        margin: 5px 0;
+        font-weight: 500;
+        text-align: center;
+        min-width: 150px;
+        transition: background 0.3s ease;
+        cursor: pointer;
+    }
+
+    .option-button:hover {
+        background: #d1d5db;
+    }
+
+    .student-list {
+        display: none;
+        margin-top: 10px;
+        padding: 10px;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .student-list.show {
+        display: block;
+    }
+
+    .student-list table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+        color: #4b5563;
+    }
+
+    .student-list th, .student-list td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .student-list th {
+        background: #e5e7eb;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .student-list td {
+        background: #fff;
+    }
+
+    .student-list tr:last-child td {
+        border-bottom: none;
+    }
+
+    .alert {
+        padding: 15px;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        color: white;
+    }
+
+    .alert-danger {
+        background: #dc2626;
+    }
+
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(30px); }
         to { opacity: 1; transform: translateY(0); }
@@ -146,8 +217,20 @@
     @media (max-width: 768px) {
         .poll-container { padding: 20px; }
         .poll-hero { font-size: 1.7rem; padding: 15px; }
+        .option-button { min-width: 100px; }
+        .student-list table { font-size: 0.85rem; }
+        .student-list th, .student-list td { padding: 8px; }
     }
 </style>
+
+<script>
+    function toggleStudentList(optionId) {
+        const studentList = document.getElementById(`student-list-${optionId}`);
+        if (studentList) {
+            studentList.classList.toggle('show');
+        }
+    }
+</script>
 
 <div class="container py-4">
     <div class="poll-container">
@@ -194,17 +277,54 @@
             {% for poll in polls %}
                 <div class="poll-card">
                     <h3>{{ poll.question }}</h3>
+                    {%Planes de los estudiantes
                     {% timezone "Asia/Kolkata" %}
                     <p><strong>Deadline:</strong> {{ poll.deadline|date:"Y-m-d H:i:s T" }}</p>
                     {% endtimezone %}
                     <p><strong>Status:</strong> <span class="status {% if poll.is_active %}active{% endif %}">
                         {% if poll.is_active %}Active{% else %}Expired{% endif %}
                     </span></p>
-                    <ul>
-                        {% for option in poll.options.all %}
-                            <li>{{ option.text }} ({{ option.vote_count }} votes)</li>
-                        {% endfor %}
-                    </ul>
+                    {% if poll.is_active %}
+                        <p><strong>Current Votes:</strong></p>
+                        <ul>
+                            {% for option in poll.options.all %}
+                                <li>{{ option.text }} ({{ option.vote_count }} votes)</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p><strong>Results:</strong></p>
+                        <div>
+                            {% for option in poll.options.all %}
+                                <div class="option-button" onclick="toggleStudentList({{ option.id }})">
+                                    {{ option.text }}: {{ option.vote_count }} votes
+                                </div>
+                                <div class="student-list" id="student-list-{{ option.id }}">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Student Name</th>
+                                                <th>Submission Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for response in option.responses.all %}
+                                                <tr>
+                                                    <td>{{ response.student.full_name }}</td>
+                                                    {% timezone "Asia/Kolkata" %}
+                                                    <td>{{ response.submitted_at|date:"Y-m-d H:i:s T" }}</td>
+                                                    {% endtimezone %}
+                                                </tr>
+                                            {% empty %}
+                                                <tr>
+                                                    <td colspan="2">No students voted for this option.</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                     <form method="post" action="{% url 'teacher:delete_poll' class_id=classroom.id section_id=section.id poll_id=poll.id %}" onsubmit="return confirm('Are you sure you want to delete this poll?');">
                         {% csrf_token %}
                         <button type="submit" class="delete-btn">Delete Poll</button>
