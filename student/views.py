@@ -1,13 +1,12 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from account.models import User
-from .forms import StudentProfileForm, StudentAssignmentSubmissionForm, PollResponseForm
+from .forms import StudentProfileForm, StudentAssignmentSubmissionForm, PollResponseForm, QuizSubmissionForm
 from .models import StudentClassroom, StudentAssignmentSubmission, PollResponse
-from teacher.models import Classroom, Section, Resource, Assignment, Poll
+from teacher.models import Classroom, Section, Resource, Assignment, Poll, Quiz, QuizSubmission, QuizAnswer
 import json
 from django.utils import timezone
 
@@ -213,6 +212,79 @@ def answer_poll(request, class_id, section_id):
         'section': section,
         'polls_data': polls_data,
         'form_error': form_error
+    })
+
+@login_required
+def quiz_list(request, class_id, section_id):
+    student_class = get_object_or_404(StudentClassroom, student=request.user, joined_class_id=class_id)
+    class_detail = student_class.joined_class
+    section = get_object_or_404(Section, id=section_id, classroom=class_detail)
+    quizzes = Quiz.objects.filter(section=section).prefetch_related('questions__options', 'submissions')
+    quizzes_data = []
+    for quiz in quizzes:
+        submission = QuizSubmission.objects.filter(student=request.user, quiz=quiz).first()
+        quizzes_data.append({
+            'quiz': quiz,
+            'submission': submission
+        })
+    return render(request, 'student/quiz_list.html', {
+        'class_obj': class_detail,
+        'section': section,
+        'quizzes_data': quizzes_data
+    })
+
+@login_required
+def attempt_quiz(request, class_id, section_id, quiz_id):
+    student_class = get_object_or_404(StudentClassroom, student=request.user, joined_class_id=class_id)
+    class_detail = student_class.joined_class
+    section = get_object_or_404(Section, id=section_id, classroom=class_detail)
+    quiz = get_object_or_404(Quiz, id=quiz_id, section=section)
+    
+    # Check if quiz is expired or already attempted
+    if not quiz.is_active:
+        messages.error(request, "This quiz has expired.")
+        return redirect('student:quiz_list', class_id=class_id, section_id=section_id)
+    if QuizSubmission.objects.filter(student=request.user, quiz=quiz).exists():
+        messages.error(request, "You have already attempted this quiz.")
+        return redirect('student:quiz_list', class_id=class_id, section_id=section_id)
+    
+    if request.method == 'POST':
+        form = QuizSubmissionForm(request.POST, quiz=quiz)
+        if form.is_valid():
+            # Create quiz submission
+            submission = QuizSubmission.objects.create(
+                student=request.user,
+                quiz=quiz,
+                score=0
+            )
+            # Process each question
+            score = 0
+            total_questions = quiz.questions.count()
+            for question in quiz.questions.all().order_by('order'):
+                field_name = f'question_{question.id}'
+                selected_option = form.cleaned_data.get(field_name)
+                if selected_option:
+                    QuizAnswer.objects.create(
+                        submission=submission,
+                        question=question,
+                        selected_option=selected_option
+                    )
+                    if selected_option.is_correct:
+                        score += 1
+            submission.score = score
+            submission.save()
+            messages.success(request, f"Quiz submitted successfully. Your score: {score}/{total_questions}")
+            return redirect('student:quiz_list', class_id=class_id, section_id=section_id)
+        else:
+            messages.error(request, "Please answer all questions.")
+    else:
+        form = QuizSubmissionForm(quiz=quiz)
+    
+    return render(request, 'student/attempt_quiz.html', {
+        'class_obj': class_detail,
+        'section': section,
+        'quiz': quiz,
+        'form': form
     })
 
 @csrf_exempt

@@ -1,0 +1,116 @@
+{% extends 'student/base.html' %}
+{% block title %}Quizzes - {{ section.name }} - {{ class_obj.class_name }} - Course Craft{% endblock %}
+
+{% block content %}
+<style>
+    .quiz-container {
+        max-width: 90%;
+        margin: 0 auto;
+        padding: 40px;
+        background: linear-gradient(145deg, #f0f4f8, #e0e7ff);
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        animation: fadeIn 0.7s ease-out;
+    }
+
+    .quiz-hero {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), var(--secondary-blue, #3b82f6));
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        color: white;
+        font-weight: 800;
+        font-size: 2.3rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 2.5rem;
+    }
+
+    .quiz-list {
+        margin-top: 2rem;
+    }
+
+    .quiz-item {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .quiz-item h4 {
+        color: var(--primary-blue, #1e3a8a);
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .quiz-item p {
+        color: #4b5563;
+        margin: 0;
+    }
+
+    .btn-attempt {
+        background: var(--secondary-blue, #3b82f6);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .btn-attempt:hover {
+        background: var(--primary-blue, #1e3a8a);
+    }
+
+    .btn-disabled {
+        background: #d1d5db;
+        color: #6b7280;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        cursor: not-allowed;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        .quiz-container { padding: 20px; }
+        .quiz-hero { font-size: 1.7rem; padding: 15px; }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="quiz-container">
+        <div class="quiz-hero">Quizzes</div>
+        <div class="quiz-list">
+            {% for quiz_data in quizzes_data %}
+                <div class="quiz-item">
+                    <div>
+                        <h4>{{ quiz_data.quiz.title }}</h4>
+                        <p>Created: {{ quiz_data.quiz.created_at|date:"Y-m-d H:i" }} | Deadline: {{ quiz_data.quiz.deadline|date:"Y-m-d H:i" }}</p>
+                        {% if quiz_data.submission %}
+                            <p>Your Score: {{ quiz_data.submission.score }} / {{ quiz_data.quiz.questions.count }}</p>
+                        {% elif not quiz_data.quiz.is_active %}
+                            <p>Quiz Expired</p>
+                        {% endif %}
+                    </div>
+                    {% if quiz_data.submission or not quiz_data.quiz.is_active %}
+                        <a class="btn-disabled">Attempt</a>
+                    {% else %}
+                        <a href="{% url 'student:attempt_quiz' class_id=class_obj.id section_id=section.id quiz_id=quiz_data.quiz.id %}" class="btn-attempt">Attempt</a>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p>No quizzes available for this section.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

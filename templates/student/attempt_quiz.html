@@ -1,0 +1,99 @@
+{% extends 'student/base.html' %}
+{% block title %}Attempt Quiz - {{ quiz.title }} - {{ section.name }} - {{ class_obj.class_name }} - Course Craft{% endblock %}
+
+{% block content %}
+<style>
+    .quiz-container {
+        max-width: 90%;
+        margin: 0 auto;
+        padding: 40px;
+        background: linear-gradient(145deg, #f0f4f8, #e0e7ff);
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        animation: fadeIn 0.7s ease-out;
+    }
+
+    .quiz-hero {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), var(--secondary-blue, #3b82f6));
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        color: white;
+        font-weight: 800;
+        font-size: 2.3rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 2.5rem;
+    }
+
+    .question-block {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .question-block h4 {
+        color: var(--primary-blue, #1e3a8a);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .form-check {
+        margin-bottom: 0.5rem;
+    }
+
+    .error-message {
+        color: #dc2626;
+        margin-bottom: 1rem;
+    }
+
+    .btn-submit {
+        background: var(--secondary-blue, #3b82f6);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .btn-submit:hover {
+        background: var(--primary-blue, #1e3a8a);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        .quiz-container { padding: 20px; }
+        .quiz-hero { font-size: 1.7rem; padding: 15px; }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="quiz-container">
+        <div class="quiz-hero">{{ quiz.title }}</div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="question-block">
+                    <h4>{{ field.label }}</h4>
+                    {% for radio in field %}
+                        <div class="form-check">
+                            {{ radio }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-submit">Submit Quiz</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

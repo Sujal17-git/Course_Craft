@@ -1,7 +1,7 @@
 from django import forms
 from account.models import User
 from .models import StudentAssignmentSubmission, PollResponse
-from teacher.models import PollOption
+from teacher.models import PollOption, QuizOption
 
 class StudentProfileForm(forms.ModelForm):
     class Meta:
@@ -37,3 +37,16 @@ class PollResponseForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if poll:
             self.fields['option'].queryset = PollOption.objects.filter(poll=poll)
+
+class QuizSubmissionForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        quiz = kwargs.pop('quiz', None)
+        super().__init__(*args, **kwargs)
+        if quiz:
+            for question in quiz.questions.all().order_by('order'):
+                self.fields[f'question_{question.id}'] = forms.ModelChoiceField(
+                    queryset=question.options.all(),
+                    widget=forms.RadioSelect,
+                    empty_label=None,
+                    label=question.text
+                )

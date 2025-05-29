@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from teacher.models import Classroom, Assignment, Poll, PollOption
+from teacher.models import Classroom, Assignment, Poll, PollOption, Quiz
 from django.core.validators import FileExtensionValidator
 
 class StudentClassroom(models.Model):
