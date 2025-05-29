@@ -1,0 +1,99 @@
+{% extends 'student/base.html' %}
+{% block title %}Quiz Results - {{ quiz.title }} - {{ section.name }} - {{ class_obj.class_name }} - Course Craft{% endblock %}
+
+{% block content %}
+<style>
+    .results-container {
+        max-width: 90%;
+        margin: 0 auto;
+        padding: 40px;
+        background: linear-gradient(145deg, #f0f4f8, #e0e7ff);
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        animation: fadeIn 0.7s ease-out;
+    }
+
+    .results-hero {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), var(--secondary-blue, #3b82f6));
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        color: white;
+        font-weight: 800;
+        font-size: 2.3rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 2.5rem;
+    }
+
+    .results-list {
+        margin-top: 2rem;
+    }
+
+    .result-item {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-item h4 {
+        color: var(--primary-blue, #1e3a8a);
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .result-item p {
+        color: #4b5563;
+        margin: 5px 0;
+    }
+
+    .correct {
+        color: #15803d;
+        font-weight: 600;
+    }
+
+    .incorrect {
+        color: #b91c1c;
+        font-weight: 600;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        .results-container { padding: 20px; }
+        .results-hero { font-size: 1.7rem; padding: 15px; }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="results-container">
+        <div class="results-hero">{{ quiz.title }} Results</div>
+        <p>Your Score: {{ submission.score }} / {{ quiz.questions.count }}</p>
+        <p>Submitted: {{ submission.submitted_at|date:"Y-m-d H:i" }}</p>
+        <div class="results-list">
+            {% for result in results_data %}
+                <div class="result-item">
+                    <h4>{{ result.question.text }}</h4>
+                    <p>Your Answer: {{ result.selected_option.text }} 
+                        {% if result.is_correct %}
+                            <span class="correct">(Correct)</span>
+                        {% else %}
+                            <span class="incorrect">(Incorrect)</span>
+                        {% endif %}
+                    </p>
+                    {% if not result.is_correct %}
+                        <p>Correct Answer: {{ result.correct_option.text }}</p>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p>No results available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -178,14 +178,12 @@ def answer_poll(request, class_id, section_id):
         
         form = PollResponseForm(request.POST, poll=poll)
         if form.is_valid():
-            # Decrement vote count of previous option if updating
             existing_response = PollResponse.objects.filter(student=request.user, poll=poll).first()
             if existing_response:
                 existing_response.option.vote_count -= 1
                 existing_response.option.responses.remove(existing_response)
                 existing_response.option.save()
             
-            # Create or update response
             response, created = PollResponse.objects.get_or_create(
                 student=request.user,
                 poll=poll,
@@ -196,7 +194,6 @@ def answer_poll(request, class_id, section_id):
                 response.submitted_at = timezone.now()
                 response.save()
             
-            # Increment vote count and add to responses
             selected_option = form.cleaned_data['option']
             selected_option.vote_count += 1
             selected_option.responses.add(response)
@@ -240,7 +237,6 @@ def attempt_quiz(request, class_id, section_id, quiz_id):
     section = get_object_or_404(Section, id=section_id, classroom=class_detail)
     quiz = get_object_or_404(Quiz, id=quiz_id, section=section)
     
-    # Check if quiz is expired or already attempted
     if not quiz.is_active:
         messages.error(request, "This quiz has expired.")
         return redirect('student:quiz_list', class_id=class_id, section_id=section_id)
@@ -251,13 +247,11 @@ def attempt_quiz(request, class_id, section_id, quiz_id):
     if request.method == 'POST':
         form = QuizSubmissionForm(request.POST, quiz=quiz)
         if form.is_valid():
-            # Create quiz submission
             submission = QuizSubmission.objects.create(
                 student=request.user,
                 quiz=quiz,
                 score=0
             )
-            # Process each question
             score = 0
             total_questions = quiz.questions.count()
             for question in quiz.questions.all().order_by('order'):
@@ -285,6 +279,37 @@ def attempt_quiz(request, class_id, section_id, quiz_id):
         'section': section,
         'quiz': quiz,
         'form': form
+    })
+
+@login_required
+def quiz_results(request, class_id, section_id, quiz_id):
+    student_class = get_object_or_404(StudentClassroom, student=request.user, joined_class_id=class_id)
+    class_detail = student_class.joined_class
+    section = get_object_or_404(Section, id=section_id, classroom=class_detail)
+    quiz = get_object_or_404(Quiz, id=quiz_id, section=section)
+    submission = get_object_or_404(QuizSubmission, student=request.user, quiz=quiz)
+    
+    # Fetch answers with related questions and options
+    answers = QuizAnswer.objects.filter(submission=submission).select_related('question', 'selected_option').order_by('question__order')
+    
+    results_data = []
+    for answer in answers:
+        question = answer.question
+        selected_option = answer.selected_option
+        correct_option = question.options.filter(is_correct=True).first()
+        results_data.append({
+            'question': question,
+            'selected_option': selected_option,
+            'correct_option': correct_option,
+            'is_correct': selected_option.is_correct
+        })
+    
+    return render(request, 'student/quiz_results.html', {
+        'class_obj': class_detail,
+        'section': section,
+        'quiz': quiz,
+        'submission': submission,
+        'results_data': results_data
     })
 
 @csrf_exempt
