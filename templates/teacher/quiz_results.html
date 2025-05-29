@@ -1,0 +1,93 @@
+{% extends 'teacher/base.html' %}
+{% block title %}Quiz Results - {{ quiz.title }} - {{ section.name }} - {{ classroom.class_name }} - Course Craft{% endblock %}
+
+{% block content %}
+<style>
+    .results-container {
+        max-width: 90%;
+        margin: 0 auto;
+        padding: 40px;
+        background: linear-gradient(145deg, #f0f4f8, #e0e7ff);
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        animation: fadeIn 0.7s ease-out;
+    }
+
+    .results-hero {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), var(--secondary-blue, #3b82f6));
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        color: white;
+        font-weight: 800;
+        font-size: 2.3rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 2.5rem;
+    }
+
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .results-table th, .results-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .results-table th {
+        background: var(--primary-blue, #1e3a8a);
+        color: white;
+        font-weight: 600;
+    }
+
+    .results-table tr:hover {
+        background: #f9fafb;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        .results-container { padding: 20px; }
+        .results-hero { font-size: 1.7rem; padding: 15px; }
+        .results-table th, .results-table td { font-size: 0.9rem; padding: 10px; }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="results-container">
+        <div class="results-hero">{{ quiz.title }} Results</div>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Score</th>
+                    <th>Submitted At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions %}
+                    <tr>
+                        <td>{{ submission.student.full_name }}</td>
+                        <td>{{ submission.score }} / {{ quiz.questions.count }}</td>
+                        <td>{{ submission.submitted_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3">No submissions yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

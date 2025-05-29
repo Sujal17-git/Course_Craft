@@ -20,6 +20,9 @@ urlpatterns = [
     path('class/<int:class_id>/section/<int:section_id>/add-assignment/', views.add_assignment, name='add_assignment'),
     path('class/<int:class_id>/section/<int:section_id>/add-poll/', views.add_poll, name='add_poll'),
     path('class/<int:class_id>/section/<int:section_id>/delete-poll/<int:poll_id>/', views.delete_poll, name='delete_poll'),
+    path('class/<int:class_id>/section/<int:section_id>/add-quiz/', views.add_quiz, name='add_quiz'),
+    path('class/<int:class_id>/section/<int:section_id>/delete-quiz/<int:quiz_id>/', views.delete_quiz, name='delete_quiz'),
+    path('class/<int:class_id>/section/<int:section_id>/quiz/<int:quiz_id>/results/', views.quiz_results, name='quiz_results'),
     path('class/<int:class_id>/section/<int:section_id>/assignment/<int:assignment_id>/submissions/', views.get_assignment_submissions, name='get_assignment_submissions'),
     path('class/<int:class_id>/section/<int:section_id>/assignment/<int:assignment_id>/reject-submission/<int:submission_id>/', views.reject_submission, name='reject_submission'),
 ]

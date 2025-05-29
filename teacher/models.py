@@ -1,4 +1,3 @@
-
 from django.db import models
 from account.models import User
 from django.core.validators import FileExtensionValidator
@@ -79,3 +78,56 @@ class PollOption(models.Model):
 
     def __str__(self):
         return self.text
+
+class Quiz(models.Model):
+    title = models.CharField(max_length=200)
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='quizzes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    deadline = models.DateTimeField()
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def is_active(self):
+        return self.deadline > timezone.now()
+
+class QuizQuestion(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    text = models.CharField(max_length=500)
+    order = models.PositiveIntegerField(default=0)  # To maintain question order
+
+    def __str__(self):
+        return self.text
+
+class QuizOption(models.Model):
+    question = models.ForeignKey(QuizQuestion, on_delete=models.CASCADE, related_name='options')
+    text = models.CharField(max_length=200)
+    is_correct = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.text
+
+class QuizSubmission(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='submissions')
+    student = models.ForeignKey('account.User', on_delete=models.CASCADE)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    score = models.PositiveIntegerField(default=0)  # Total score for the submission
+
+    class Meta:
+        unique_together = ('quiz', 'student')  # One submission per student per quiz
+
+    def __str__(self):
+        return f"{self.student.full_name} - {self.quiz.title}"
+
+class QuizAnswer(models.Model):
+    submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name='answers')
+    question = models.ForeignKey(QuizQuestion, on_delete=models.CASCADE)
+    selected_option = models.ForeignKey(QuizOption, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('submission', 'question')  # One answer per question per submission
+
+    def __str__(self):
+        return f"{self.question.text} - {self.selected_option.text}"

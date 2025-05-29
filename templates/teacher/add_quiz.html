@@ -1,0 +1,203 @@
+{% extends 'teacher/base.html' %}
+{% block title %}Add Quiz - {{ section.name }} - {{ classroom.class_name }} - Course Craft{% endblock %}
+
+{% block content %}
+<style>
+    .quiz-container {
+        max-width: 90%;
+        margin: 0 auto;
+        padding: 40px;
+        background: linear-gradient(145deg, #f0f4f8, #e0e7ff);
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        animation: fadeIn 0.7s ease-out;
+    }
+
+    .quiz-hero {
+        background: linear-gradient(90deg, var(--primary-blue, #1e3a8a), var(--secondary-blue, #3b82f6));
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        color: white;
+        font-weight: 800;
+        font-size: 2.3rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 2.5rem;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .question-block {
+        margin-bottom: 1.5rem;
+        padding: 15px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #f9fafb;
+    }
+
+    .quiz-list {
+        margin-top: 2rem;
+    }
+
+    .quiz-item {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .quiz-item a {
+        color: var(--secondary-blue, #3b82f6);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .quiz-item a:hover {
+        text-decoration: underline;
+    }
+
+    .delete-btn {
+        color: #dc2626;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .delete-btn:hover {
+        text-decoration: underline;
+    }
+
+    .error-message {
+        color: #dc2626;
+        margin-bottom: 1rem;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        .quiz-container { padding: 20px; }
+        .quiz-hero { font-size: 1.7rem; padding: 15px; }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="quiz-container">
+        <div class="quiz-hero">Add Quiz</div>
+        {% if form_error %}
+            <div class="error-message">{{ form_error }}</div>
+        {% endif %}
+        <div class="form-section">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">Quiz Title</label>
+                    {{ form.title }}
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.deadline.id_for_label }}" class="form-label">Deadline</label>
+                    {{ form.deadline }}
+                </div>
+                <div id="questions-container">
+                    <div class="question-block">
+                        <h4>Question 1</h4>
+                        <div class="mb-3">
+                            <label class="form-label">Question Text</label>
+                            <input type="text" name="question_1" class="form-control">
+                        </div>
+                        <div class="row">
+                            {% for i in "1234" %}
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Option {{ i }}</label>
+                                <input type="text" name="question_1_option_{{ i }}" class="form-control">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Correct Option</label>
+                            <select name="question_1_correct_option" class="form-control">
+                                <option value="0">Select correct option</option>
+                                <option value="1">Option 1</option>
+                                <option value="2">Option 2</option>
+                                <option value="3">Option 3</option>
+                                <option value="4">Option 4</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="add-question" class="btn btn-primary mb-3">Add Question</button>
+                <button type="submit" class="btn btn-success">Create Quiz</button>
+            </form>
+        </div>
+        <div class="quiz-list">
+            <h3>Existing Quizzes</h3>
+            {% for quiz in quizzes %}
+                <div class="quiz-item">
+                    <div>
+                        <a href="{% url 'teacher:quiz_results' class_id=classroom.id section_id=section.id quiz_id=quiz.id %}">{{ quiz.title }}</a>
+                        <p>Created: {{ quiz.created_at|date:"Y-m-d H:i" }} | Deadline: {{ quiz.deadline|date:"Y-m-d H:i" }} | {% if quiz.is_active %}Active{% else %}Expired{% endif %}</p>
+                    </div>
+                    <form method="post" action="{% url 'teacher:delete_quiz' class_id=classroom.id section_id=section.id quiz_id=quiz.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-btn">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    let questionCount = 1;
+    const maxQuestions = 25;
+
+    document.getElementById('add-question').addEventListener('click', function() {
+        if (questionCount >= maxQuestions) {
+            alert('Maximum 25 questions allowed.');
+            return;
+        }
+        questionCount++;
+        const container = document.getElementById('questions-container');
+        const questionBlock = document.createElement('div');
+        questionBlock.className = 'question-block';
+        questionBlock.innerHTML = `
+            <h4>Question ${questionCount}</h4>
+            <div class="mb-3">
+                <label class="form-label">Question Text</label>
+                <input type="text" name="question_${questionCount}" class="form-control">
+            </div>
+            <div class="row">
+                ${[1, 2, 3, 4].map(i => `
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Option ${i}</label>
+                        <input type="text" name="question_${questionCount}_option_${i}" class="form-control">
+                    </div>
+                `).join('')}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Correct Option</label>
+                <select name="question_${questionCount}_correct_option" class="form-control">
+                    <option value="0">Select correct option</option>
+                    <option value="1">Option 1</option>
+                    <option value="2">Option 2</option>
+                    <option value="3">Option 3</option>
+                    <option value="4">Option 4</option>
+                </select>
+            </div>
+        `;
+        container.appendChild(questionBlock);
+    });
+</script>
+{% endblock %}

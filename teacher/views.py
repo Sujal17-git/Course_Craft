@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from account.models import User
-from .forms import TeacherProfileForm, SectionForm, ResourceForm, AssignmentForm, PollForm
-from .models import Classroom, Section, Resource, Assignment, Poll
+from .forms import TeacherProfileForm, SectionForm, ResourceForm, AssignmentForm, PollForm, QuizForm
+from .models import Classroom, Section, Resource, Assignment, Poll, Quiz, QuizSubmission
 from student.models import StudentClassroom, StudentAssignmentSubmission
 import json
 
@@ -291,3 +291,63 @@ def reject_submission(request, class_id, section_id, assignment_id, submission_i
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
     return JsonResponse({"success": False, "message": "Invalid request method"})
+
+@login_required
+def add_quiz(request, class_id, section_id):
+    classroom = get_object_or_404(Classroom, id=class_id, teacher=request.user)
+    section = get_object_or_404(Section, id=section_id, classroom=classroom)
+    quizzes = section.quizzes.all().prefetch_related('questions__options')
+    form_error = None
+    if request.method == 'POST':
+        form = QuizForm(request.POST)
+        questions_data = []
+        for i in range(1, 26):  # Support up to 25 questions
+            question_text = request.POST.get(f'question_{i}')
+            if question_text:
+                options = [
+                    request.POST.get(f'question_{i}_option_{j}') for j in range(1, 5)
+                ]
+                correct_option = int(request.POST.get(f'question_{i}_correct_option', 0))
+                if all(options) and correct_option in [1, 2, 3, 4]:
+                    questions_data.append({
+                        'text': question_text,
+                        'options': options,
+                        'correct_option': correct_option
+                    })
+        if form.is_valid() and questions_data:
+            form.save(commit=True, section=section, user=request.user, questions_data=questions_data)
+            return redirect('teacher:add_quiz', class_id=class_id, section_id=section_id)
+        else:
+            form_error = "Error adding quiz. Ensure at least one valid question with four options and a correct answer is provided."
+    else:
+        form = QuizForm()
+    return render(request, 'teacher/add_quiz.html', {
+        'classroom': classroom,
+        'section': section,
+        'quizzes': quizzes,
+        'form': form,
+        'form_error': form_error,
+    })
+
+@login_required
+def delete_quiz(request, class_id, section_id, quiz_id):
+    classroom = get_object_or_404(Classroom, id=class_id, teacher=request.user)
+    section = get_object_or_404(Section, id=section_id, classroom=classroom)
+    quiz = get_object_or_404(Quiz, id=quiz_id, section=section)
+    if request.method == 'POST':
+        quiz.delete()
+        return redirect('teacher:add_quiz', class_id=class_id, section_id=section_id)
+    return redirect('teacher:add_quiz', class_id=class_id, section_id=section_id)
+
+@login_required
+def quiz_results(request, class_id, section_id, quiz_id):
+    classroom = get_object_or_404(Classroom, id=class_id, teacher=request.user)
+    section = get_object_or_404(Section, id=section_id, classroom=classroom)
+    quiz = get_object_or_404(Quiz, id=quiz_id, section=section)
+    submissions = quiz.submissions.all().select_related('student').order_by('-score')
+    return render(request, 'teacher/quiz_results.html', {
+        'classroom': classroom,
+        'section': section,
+        'quiz': quiz,
+        'submissions': submissions,
+    })

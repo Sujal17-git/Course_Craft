@@ -1,7 +1,6 @@
-
 from django import forms
 from account.models import User
-from .models import Section, Resource, Assignment, Poll, PollOption
+from .models import Section, Resource, Assignment, Poll, PollOption, Quiz, QuizQuestion, QuizOption
 from django.utils import timezone
 
 class TeacherProfileForm(forms.ModelForm):
@@ -108,3 +107,50 @@ class PollForm(forms.ModelForm):
                 if option_text:
                     PollOption.objects.create(poll=poll, text=option_text)
         return poll
+
+class QuizForm(forms.ModelForm):
+    deadline = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+        label="Deadline (IST)"
+    )
+
+    class Meta:
+        model = Quiz
+        fields = ['title', 'deadline']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+    def clean_deadline(self):
+        deadline = self.cleaned_data.get('deadline')
+        if not timezone.is_aware(deadline):
+            deadline = timezone.make_aware(deadline, timezone.get_default_timezone())
+        if deadline <= timezone.now():
+            raise forms.ValidationError("Deadline must be in the future.")
+        return deadline
+
+    def save(self, commit=True, section=None, user=None, questions_data=None):
+        quiz = super().save(commit=False)
+        if section:
+            quiz.section = section
+        if user:
+            quiz.created_by = user
+        if commit:
+            quiz.save()
+            if questions_data:
+                for idx, q_data in enumerate(questions_data, start=1):
+                    if q_data['text']:
+                        question = QuizQuestion.objects.create(
+                            quiz=quiz,
+                            text=q_data['text'],
+                            order=idx
+                        )
+                        for opt_idx, opt_text in enumerate(q_data['options'], start=1):
+                            if opt_text:
+                                is_correct = (opt_idx == q_data['correct_option'])
+                                QuizOption.objects.create(
+                                    question=question,
+                                    text=opt_text,
+                                    is_correct=is_correct
+                                )
+        return quiz

@@ -121,7 +121,7 @@
                 <h3>Polls</h3>
                 <p>Participate in polls and share your opinions.</p>
             </div>
-            <div class="card" onclick="window.location.href='#'">
+            <div class="card" onclick="window.location.href='{% url 'teacher:add_quiz' class_id=classroom.id section_id=section.id %}'">
                 <div class="card-icon">❓</div>
                 <h3>Quizzes</h3>
                 <p>Test your knowledge with interactive quizzes.</p>
