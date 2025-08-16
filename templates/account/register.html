@@ -3,6 +3,7 @@
 {% block title %}Register - Course Craft{% endblock %}
 {% block content %}
 <style>
+    /* Custom animations for a smooth transition effect */
     @keyframes slideOutToRight {
         0% { transform: translateX(0); opacity: 1; }
         100% { transform: translateX(100%); opacity: 0.3; }
@@ -39,69 +40,101 @@
         animation: slideInFromRight 0.75s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
     }
 
+    /* Style for the toggle buttons */
     .toggle-btn {
-        transition: background-color 0.3s ease, color 0.3s ease;
+        transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
     }
 
     .toggle-btn.active {
-        background-color: #3B82F6; /* blue-500 */
+        background-color: #3b82f6; /* blue-500 */
         color: white;
+        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3); /* Subtle blue shadow */
     }
 
+    /* Style for the input fields, adding focus effects */
     input, button {
-        transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    input:focus {
+        border-color: #3b82f6; /* blue-500 */
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Blue ring on focus */
+        outline: none;
     }
 
+    /* Styling for the date input picker */
     input[type="date"]::-webkit-calendar-picker-indicator {
-        filter: invert(48%) sepia(13%) saturate(3207%) hue-rotate(190deg) brightness(95%) contrast(80%); /* Blue tint for datepicker icon */
+        filter: invert(48%) sepia(13%) saturate(3207%) hue-rotate(190deg) brightness(95%) contrast(80%);
+        cursor: pointer;
     }
+
+    /* Welcome section background gradient */
+    .welcome-bg {
+        background-image: linear-gradient(135deg, #1f4068 0%, #3b82f6 100%);
+        box-shadow: inset 0 0 100px rgba(0,0,0,0.1); /* Inner shadow for depth */
+    }
+
 </style>
 
 <div class="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-100 to-gray-200">
-    <div id="container" class="flex w-full max-w-4xl rounded-2xl shadow-lg overflow-hidden flex-row bg-white">
+    <div id="container" class="flex w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex-row bg-white">
         <!-- Form Section -->
-        <div id="form-section" class="w-1/2 p-8 bg-blue-50">
-            <h2 class="text-3xl font-bold mb-6 text-blue-800">Registration</h2>
+        <div id="form-section" class="w-1/2 p-8 md:p-12 lg:p-16 bg-white">
+            <h2 class="text-3xl lg:text-4xl font-extrabold mb-6 text-blue-800">Register</h2>
             <!-- Toggle Buttons -->
-            <div class="flex mb-6">
-                <button type="button" id="student-toggle" class="flex-1 py-2 px-4 bg-blue-500 text-white rounded-l-lg toggle-btn active">Student</button>
-                <button type="button" id="teacher-toggle" class="flex-1 py-2 px-4 bg-gray-300 text-gray-800 rounded-r-lg toggle-btn">Teacher</button>
+            <div class="flex mb-8 rounded-full bg-gray-200 p-1">
+                <button type="button" id="student-toggle" class="flex-1 py-2 px-4 font-semibold rounded-full toggle-btn active">Student</button>
+                <button type="button" id="teacher-toggle" class="flex-1 py-2 px-4 font-semibold rounded-full toggle-btn">Teacher</button>
             </div>
             <form method="post" id="registration-form">
                 {% csrf_token %}
-                <div class="mb-4">
-                    <label class="block text-blue-700 mb-2" for="id_username">Username</label>
-                    {{ form.username|add_class:"w-full border rounded px-3 py-2 border-blue-300 focus:border-blue-500 focus:outline-none" }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-blue-700 mb-2" for="id_full_name">Full Name</label>
-                    {{ form.full_name|add_class:"w-full border rounded px-3 py-2 border-blue-300 focus:border-blue-500 focus:outline-none" }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-blue-700 mb-2" for="id_date_of_birth">Date of Birth</label>
-                    {{ form.date_of_birth|add_class:"w-full border rounded px-3 py-2 border-blue-300 focus:border-blue-500 focus:outline-none" }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-blue-700 mb-2" for="id_email">Email</label>
-                    {{ form.email|add_class:"w-full border rounded px-3 py-2 border-blue-300 focus:border-blue-500 focus:outline-none" }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-blue-700 mb-2" for="id_password">Password</label>
-                    {{ form.password|add_class:"w-full border rounded px-3 py-2 border-blue-300 focus:border-blue-500 focus:outline-none" }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-blue-700 mb-2" for="id_confirm_password">Confirm Password</label>
-                    {{ form.confirm_password|add_class:"w-full border rounded px-3 py-2 border-blue-300 focus:border-blue-500 focus:outline-none" }}
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1" for="id_username">Username</label>
+                        {{ form.username|add_class:"w-full border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-blue-500 focus:outline-none" }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1" for="id_full_name">Full Name</label>
+                        {{ form.full_name|add_class:"w-full border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-blue-500 focus:outline-none" }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1" for="id_date_of_birth">Date of Birth</label>
+                        {{ form.date_of_birth|add_class:"w-full border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-blue-500 focus:outline-none" }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1" for="id_email">Email</label>
+                        {{ form.email|add_class:"w-full border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-blue-500 focus:outline-none" }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1" for="id_password">Password</label>
+                        {{ form.password|add_class:"w-full border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-blue-500 focus:outline-none" }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1" for="id_confirm_password">Confirm Password</label>
+                        {{ form.confirm_password|add_class:"w-full border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-blue-500 focus:outline-none" }}
+                    </div>
                 </div>
                 {{ form.is_teacher }}
-                <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">Register</button>
+                <button type="submit" class="w-full mt-8 bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">Register</button>
             </form>
-            <p class="mt-4 text-center text-blue-600">Already have an account? <a href="{% url 'login' %}" class="text-blue-800 hover:underline">Login</a></p>
+            <p class="mt-6 text-center text-blue-600">Already have an account? <a href="{% url 'login' %}" class="text-blue-800 font-semibold hover:underline">Login</a></p>
         </div>
         <!-- Welcome Section -->
-        <div id="welcome-section" class="w-1/2 bg-blue-500 text-white flex flex-col justify-center items-center p-8">
-            <h2 class="text-3xl font-bold mb-4" id="welcome-message">Welcome, Student!</h2>
-            <p id="welcome-subtext">Join as a student to explore courses and assignments.</p>
+        <div id="welcome-section" class="welcome-bg w-1/2 text-white flex flex-col justify-center items-center p-8 text-center">
+            <div id="welcome-icon" class="mb-4">
+                <!-- Initial Icon (Student) -->
+                <svg id="student-icon" xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-book-open">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                <!-- Teacher Icon (Hidden by default) -->
+                <svg id="teacher-icon" xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-briefcase hidden">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+            </div>
+            <h2 class="text-3xl lg:text-4xl font-extrabold mb-4" id="welcome-message">Welcome, Student!</h2>
+            <p class="text-lg lg:text-xl font-light" id="welcome-subtext">Join as a student to explore courses and assignments.</p>
         </div>
     </div>
 </div>
@@ -115,13 +148,17 @@
     const welcomeSection = document.getElementById('welcome-section');
     const welcomeMessage = document.getElementById('welcome-message');
     const welcomeSubtext = document.getElementById('welcome-subtext');
+    const studentIcon = document.getElementById('student-icon');
+    const teacherIcon = document.getElementById('teacher-icon');
 
     function setActiveToggle(activeBtn, inactiveBtn, isTeacherValue, message, subtext, formOutClass, formInClass, welcomeOutClass, welcomeInClass, flexDirection) {
+        // Toggle active button classes
         activeBtn.classList.add('bg-blue-500', 'text-white', 'active');
         activeBtn.classList.remove('bg-gray-300', 'text-gray-800');
         inactiveBtn.classList.add('bg-gray-300', 'text-gray-800');
         inactiveBtn.classList.remove('bg-blue-500', 'text-white', 'active');
 
+        // Update the hidden field value for Django form
         isTeacherField.value = isTeacherValue;
 
         // Apply "out" animations
@@ -138,6 +175,17 @@
             welcomeMessage.textContent = message;
             welcomeSubtext.textContent = subtext;
 
+            // Toggle the icon visibility
+            if (isTeacherValue == 1) {
+                studentIcon.classList.add('hidden');
+                teacherIcon.classList.remove('hidden');
+            } else {
+                studentIcon.classList.remove('hidden');
+                teacherIcon.classList.add('hidden');
+            }
+
+            formSection.classList.remove(formOutClass); // Remove "out" class before adding "in"
+            welcomeSection.classList.remove(welcomeOutClass); // Remove "out" class before adding "in"
             formSection.classList.add(formInClass);
             welcomeSection.classList.add(welcomeInClass);
         }, 750); // Matches the "out" animation duration (0.75s)
@@ -150,10 +198,10 @@
             0,
             'Welcome, Student!',
             'Join as a student to explore courses and assignments.',
-            'animate-out-to-right', // Form slides out to the right
-            'animate-in-from-left', // Form slides in from the left
-            'animate-out-to-left', // Welcome slides out to the left
-            'animate-in-from-right', // Welcome slides in from the right
+            'animate-out-to-right',
+            'animate-in-from-left',
+            'animate-out-to-left',
+            'animate-in-from-right',
             'flex-row'
         );
     });
@@ -165,10 +213,10 @@
             1,
             'Welcome, Teacher!',
             'Join as a teacher to manage courses and students.',
-            'animate-out-to-left', // Form slides out to the left
-            'animate-in-from-right', // Form slides in from the right
-            'animate-out-to-right', // Welcome slides out to the right
-            'animate-in-from-left', // Welcome slides in from the left
+            'animate-out-to-left',
+            'animate-in-from-right',
+            'animate-out-to-right',
+            'animate-in-from-left',
             'flex-row-reverse'
         );
     });

@@ -1,14 +1,270 @@
-{% extends 'account/base.html' %}
-{% block title %}Home - Course Craft{% endblock %}
-{% block content %}
-    <div class="text-center">
-        <h1 class="text-3xl font-bold mb-4">Welcome to Course Craft</h1>
-        <p class="text-lg mb-6">Your platform for learning and teaching, inspired by Google Classroom.</p>
-        {% if user.is_authenticated %}
-            <a href="{% url 'dashboard' %}" class="bg-blue-600 text-white px-4 py-2 rounded">Go to Dashboard</a>
-        {% else %}
-            <a href="{% url 'login' %}" class="bg-blue-600 text-white px-4 py-2 rounded mr-2">Login</a>
-            <a href="{% url 'register' %}" class="bg-green-600 text-white px-4 py-2 rounded">Register</a>
-        {% endif %}
-    </div>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Course Craft</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Animations */
+        .fade-in {
+            animation: fadeIn 1.2s ease-in-out;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .zoom-hover:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .icon-bounce {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .hero-bg {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            left: -30%;
+            width: 160%;
+            height: 160%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Ccircle cx="60" cy="60" r="25" fill="rgba(255,255,255,0.15)" /%3E%3Ccircle cx="140" cy="140" r="35" fill="rgba(255,255,255,0.25)" /%3E%3C/svg%3E');
+            animation: parallax 20s linear infinite;
+        }
+        @keyframes parallax {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-40%, -40%); }
+        }
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%23ffffff" fill-opacity="1" d="M0,160L48,144C96,128,192,96,288,106.7C384,117,480,171,576,181.3C672,192,768,160,864,149.3C960,139,1056,149,1152,170.7C1248,192,1344,224,1392,240L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"%3E%3C/path%3E%3C/svg%3E');
+            background-size: cover;
+            animation: waveFlow 12s ease-in-out infinite;
+        }
+        @keyframes waveFlow {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-60px); }
+            100% { transform: translateX(0); }
+        }
+        .carousel-slide {
+            transition: transform 0.6s ease-in-out;
+        }
+        .carousel-dot {
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .feature-card {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .feature-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-gray-50">
+    <!-- Hero Section -->
+    <section class="hero-bg text-white py-36 relative">
+        <div class="wave"></div>
+        <div class="container mx-auto px-6 text-center fade-in relative z-10">
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight drop-shadow-xl">Course Craft: Ignite Your Learning</h1>
+            <p class="text-xl md:text-2xl mb-10 max-w-4xl mx-auto leading-relaxed">A vibrant Learning Management System inspired by Google Classroom, empowering teachers to craft dynamic classes and students to soar in their educational journey.</p>
+            <div class="flex justify-center space-x-6">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="inline-block bg-white text-blue-600 font-semibold px-12 py-5 rounded-full shadow-2xl hover:bg-blue-50 hover:shadow-xl transition duration-300 transform hover:-translate-y-2 text-lg">Your Dashboard Awaits</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="inline-block bg-white text-blue-600 font-semibold px-12 py-5 rounded-full shadow-2xl hover:bg-blue-50 hover:shadow-xl transition duration-300 transform hover:-translate-y-2 text-lg">Sign In</a>
+                    <a href="{% url 'register' %}" class="inline-block bg-blue-700 text-white font-semibold px-12 py-5 rounded-full shadow-2xl hover:bg-blue-800 hover:shadow-xl transition duration-300 transform hover:-translate-y-2 text-lg">Start Your Journey</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="bg-white py-28">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl md:text-5xl font-bold text-blue-800 text-center mb-16 fade-in relative">
+                Unleash the Power of Course Craft
+                <span class="block w-32 h-1 bg-blue-500 mx-auto mt-4 rounded-full"></span>
+            </h2>
+            <!-- Feature 1: Create Classes & Sections -->
+            <div class="flex flex-col md:flex-row items-center mb-24 feature-card fade-in">
+                <div class="md:w-1/3 flex justify-center mb-10 md:mb-0">
+                    <div class="text-yellow-400 icon-bounce">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-36 h-36" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="md:w-2/3 text-center md:text-left md:pl-14 bg-blue-50 p-10 rounded-2xl shadow-lg">
+                    <h3 class="text-3xl font-semibold text-blue-800 mb-4">Create Classes & Sections</h3>
+                    <p class="text-gray-700 mb-4 text-lg leading-relaxed">Craft vibrant classes with unique join codes and organize content into dynamic sections for effortless teaching.</p>
+                    <p class="text-gray-500 text-sm italic">Spark: AI-driven templates for instant class creation and student management.</p>
+                </div>
+            </div>
+
+            <!-- Feature 2: Resource Sharing -->
+            <div class="flex flex-col md:flex-row-reverse items-center mb-24 feature-card fade-in">
+                <div class="md:w-1/3 flex justify-center mb-10 md:mb-0">
+                    <div class="text-green-500 icon-bounce">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-36 h-36" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="md:w-2/3 text-center md:text-right md:pr-14 bg-blue-50 p-10 rounded-2xl shadow-lg">
+                    <h3 class="text-3xl font-semibold text-blue-800 mb-4">Resource Sharing</h3>
+                    <p class="text-gray-700 mb-4 text-lg leading-relaxed">Share lecture notes, videos, and interactive materials in class sections, accessible anytime, anywhere.</p>
+                    <p class="text-gray-500 text-sm italic">Spark: Real-time collaboration and a cloud-based resource hub.</p>
+                </div>
+            </div>
+
+            <!-- Feature 3: Assignments & Quizzes -->
+            <div class="flex flex-col md:flex-row items-center mb-24 feature-card fade-in">
+                <div class="md:w-1/3 flex justify-center mb-10 md:mb-0">
+                    <div class="text-red-500 icon-bounce">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-36 h-36" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="md:w-2/3 text-center md:text-left md:pl-14 bg-blue-50 p-10 rounded-2xl shadow-lg">
+                    <h3 class="text-3xl font-semibold text-blue-800 mb-4">Assignments & Quizzes</h3>
+                    <p class="text-gray-700 mb-4 text-lg leading-relaxed">Design engaging assignments and interactive quizzes to challenge students and spark curiosity.</p>
+                    <p class="text-gray-500 text-sm italic">Spark: AI-crafted quizzes with instant grading and analytics.</p>
+                </div>
+            </div>
+
+            <!-- Feature 4: Generate Polls -->
+            <div class="flex flex-col md:flex-row-reverse items-center feature-card fade-in">
+                <div class="md:w-1/3 flex justify-center mb-10 md:mb-0">
+                    <div class="text-purple-500 icon-bounce">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-36 h-36" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="md:w-2/3 text-center md:text-right md:pr-14 bg-blue-50 p-10 rounded-2xl shadow-lg">
+                    <h3 class="text-3xl font-semibold text-blue-800 mb-4">Generate Polls</h3>
+                    <p class="text-gray-700 mb-4 text-lg leading-relaxed">Create real-time polls to ignite discussions and gather instant feedback for a vibrant classroom.</p>
+                    <p class="text-gray-500 text-sm italic">Spark: Live visualizations and anonymous voting for dynamic engagement.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial Carousel -->
+    <section class="bg-blue-100 py-24 relative">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl md:text-5xl font-bold text-blue-800 text-center mb-16 fade-in">Our Community Speaks</h2>
+            <div class="relative overflow-hidden">
+                <div id="carousel" class="flex transition-transform duration-600 ease-in-out">
+                    <!-- Slide 1 -->
+                    <div class="carousel-slide min-w-full text-center px-6">
+                        <div class="bg-white p-10 rounded-2xl shadow-lg max-w-2xl mx-auto zoom-hover">
+                            <p class="text-gray-700 text-lg mb-4 leading-relaxed">"Course Craft’s intuitive design makes teaching a joy and keeps my students engaged!"</p>
+                            <p class="text-blue-700 font-semibold">— Anika, High School Teacher</p>
+                        </div>
+                    </div>
+                    <!-- Slide 2 -->
+                    <div class="carousel-slide min-w-full text-center px-6">
+                        <div class="bg-white p-10 rounded-2xl shadow-lg max-w-2xl mx-auto zoom-hover">
+                            <p class="text-gray-700 text-lg mb-4 leading-relaxed">"The quiz and resource features make learning interactive and fun!"</p>
+                            <p class="text-blue-700 font-semibold">— Vikram, University Student</p>
+                        </div>
+                    </div>
+                    <!-- Slide 3 -->
+                    <div class="carousel-slide min-w-full text-center px-6">
+                        <div class="bg-white p-10 rounded-2xl shadow-lg max-w-2xl mx-auto zoom-hover">
+                            <p class="text-gray-700 text-lg mb-4 leading-relaxed">"Polls bring my online classes to life, and the platform is so easy to use!"</p>
+                            <p class="text-blue-700 font-semibold">— Meera, Online Instructor</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Carousel Dots -->
+                <div class="flex justify-center mt-8 space-x-3">
+                    <span class="carousel-dot w-4 h-4 bg-blue-600 rounded-full cursor-pointer" onclick="moveCarousel(0)"></span>
+                    <span class="carousel-dot w-4 h-4 bg-blue-300 rounded-full cursor-pointer" onclick="moveCarousel(1)"></span>
+                    <span class="carousel-dot w-4 h-4 bg-blue-300 rounded-full cursor-pointer" onclick="moveCarousel(2)"></span>
+                </div>
+            </div>
+            <script>
+                let currentSlide = 0;
+                const slides = document.querySelectorAll('.carousel-slide');
+                const dots = document.querySelectorAll('.carousel-dot');
+                function moveCarousel(index) {
+                    currentSlide = index;
+                    document.getElementById('carousel').style.transform = `translateX(-${index * 100}%)`;
+                    dots.forEach((dot, i) => {
+                        dot.classList.toggle('bg-blue-600', i === index);
+                        dot.classList.toggle('bg-blue-300', i !== index);
+                    });
+                }
+                setInterval(() => {
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    moveCarousel(currentSlide);
+                }, 6000);
+            </script>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="bg-blue-700 text-white py-20 text-center relative">
+        <div class="container mx-auto px-6 fade-in">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">Launch Your Learning Adventure</h2>
+            <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto leading-relaxed">Join classes with unique codes and dive into a world of knowledge and collaboration.</p>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="inline-block bg-white text-blue-600 font-semibold px-12 py-5 rounded-full shadow-2xl hover:bg-blue-100 hover:shadow-xl transition duration-300 transform hover:-translate-y-2 text-lg">Join Now</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-blue-900 text-white py-16">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-left">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">Course Craft</h3>
+                    <p class="text-gray-300 leading-relaxed">Empowering education with innovation, passion, and seamless collaboration.</p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-3">
+                        <li><a href="{% url 'dashboard' %}" class="text-gray-300 hover:text-white transition">Dashboard</a></li>
+                        <li><a href="{% url 'login' %}" class="text-gray-300 hover:text-white transition">Login</a></li>
+                        <li><a href="{% url 'register' %}" class="text-gray-300 hover:text-white transition">Register</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">Stay Connected</h3>
+                    <p class="text-gray-300 mb-4">Subscribe for updates and tips!</p>
+                    <div class="flex justify-center md:justify-start">
+                        <input type="email" placeholder="Enter your email" class="px-4 py-3 rounded-l-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 w-2/3 md:w-auto">
+                        <button class="bg-blue-500 text-white px-4 py-3 rounded-r-lg hover:bg-blue-600 transition">Subscribe</button>
+                    </div>
+                    <div class="flex justify-center md:justify-start space-x-4 mt-6">
+                        <a href="#" class="text-gray-300 hover:text-white transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005 1.016-3.125 1.25-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.708.86 3.215 2.164 4.098-.797-.026-1.547-.247-2.203-.616v.062c0 2.385 1.693 4.374 3.946 4.828-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.621 1.962 2.421 3.387 4.557 3.428-1.669 1.309-3.767 2.089-6.049 2.089-.393 0-.779-.023-1.159-.067 2.141 1.374 4.683 2.176 7.413 2.176 8.894 0 13.744-7.368 13.744-13.744 0-.209 0-.42-.015-.627.944-.687 1.762-1.546 2.411-2.528z"/></svg></a>
+                        <a href="#" class="text-gray-300 hover:text-white transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.407.593 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.73 0 1.323-.593 1.323-1.325V1.325C24 .593 23.407 0 22.675 0z"/></svg></a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-8 text-gray-400">© 2025 Course Craft. All rights reserved.</div>
+        </div>
+    </footer>
+</body>
+</html>

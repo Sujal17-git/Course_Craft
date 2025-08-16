@@ -351,3 +351,4 @@ def quiz_results(request, class_id, section_id, quiz_id):
         'quiz': quiz,
         'submissions': submissions,
     })
+
