@@ -3,44 +3,265 @@
 {% block title %}Teacher Dashboard - Course Craft{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <h2 class="dashboard-header">Teacher Dashboard</h2>
-    <p class="welcome-text">Welcome, <span class="fw-bold">{{ user.full_name }}</span>!</p>
-    <p class="text-muted mb-4">Manage your classes, assignments, and students from one place.</p>
+<div class="dashboard-wrapper container-fluid py-5">
 
-    <a href="{% url 'teacher:create_class' %}" class="btn create-class-btn mb-5">
-        <i class="fas fa-plus-circle me-2"></i> Create a New Class
-    </a>
-    
-    <div class="classes-section">
-        <h5 class="section-title">Your Classes</h5>
-        <hr>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold text-gradient">Teacher Dashboard</h1>
+            <p class="lead mb-1">Welcome back, <span class="fw-bold text-primary">{{ user.full_name }}</span> 👋</p>
+            <p class="text-muted">Manage your classes, track student progress, and create engaging content.</p>
+        </div>
+        <div class="d-flex gap-3 mt-3 mt-md-0">
+            <a href="{% url 'teacher:create_class' %}" class="btn btn-lg btn-primary shadow-sm rounded-pill">
+                <i class="fas fa-plus-circle me-2"></i> New Class
+            </a>
+            <button class="btn btn-lg btn-light shadow-sm rounded-pill position-relative" data-bs-toggle="modal" data-bs-target="#notificationsModal">
+                <i class="fas fa-bell fa-lg text-secondary"></i>
+                {% if notifications > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow">
+                    {{ notifications }}
+                </span>
+                {% endif %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards (Compact and Modern Design) -->
+    <div class="row g-3 mb-5 justify-content-center">
+        <div class="col-sm-6 col-lg-4">
+            <div class="stat-card bg-soft-blue">
+                <div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                <h2 class="stat-number">{{ classes|length }}</h2>
+                <p class="stat-label">Active Classes</p>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="stat-card bg-soft-green">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <h2 class="stat-number">{{ total_students }}</h2>
+                <p class="stat-label">Total Students</p>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="stat-card bg-soft-purple">
+                <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                <h2 class="stat-number">{{ total_sections }}</h2>
+                <p class="stat-label">Total Sections</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Classes Section -->
+    <div class="classes-section mb-5">
+        <h4 class="fw-bold text-dark mb-4">Your Classes</h4>
+        <div class="row g-4">
             {% for class in classes %}
-            <div class="col">
-                <a href="{% url 'teacher:class_detail' class.id %}" class="class-card-link">
-                    <div class="class-card">
-                        <div class="class-card-header class-color-{% cycle '1' '2' '3' '4' '5' '6' %}">
-                            <h3 class="class-name">{{ class.class_name }}</h3>
-                        </div>
-                        <div class="class-card-body">
-                            <div class="card-info">
-                                <p><strong>Subject:</strong> {{ class.subject }}</p>
-                                <p><strong>Class Key:</strong> {{ class.class_key }}</p>
+            <div class="col-md-6 col-lg-4">
+                <a href="{% url 'teacher:class_detail' class.id %}" class="text-decoration-none">
+                    <div class="class-card shadow-hover border-start border-5 class-color-{% cycle '1' '2' '3' '4' '5' '6' %}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1">{{ class.class_name }}</h5>
+                                <span class="badge bg-light text-dark px-3 py-2">{{ class.subject }}</span>
                             </div>
-                            <small class="text-muted">Created by: {{ class.teacher.full_name }}</small>
+                            <button class="btn btn-sm btn-light text-danger delete-class-btn" data-class-id="{{ class.id }}" onclick="event.preventDefault(); event.stopPropagation();">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <p class="small text-muted mt-2 mb-1">Created: {{ class.created_at|date:"M d, Y" }}</p>
+                        <p class="small text-dark">
+                            <span class="fw-semibold">Key:</span>
+                            <code class="bg-light px-2 py-1 rounded">{{ class.class_key }}</code>
+                            <i class="fas fa-copy ms-2 text-muted cursor-pointer"></i>
+                        </p>
+                        <p class="text-muted small">{{ class.description|truncatewords:15 }}</p>
+
+                        <div class="d-flex justify-content-between border-top pt-3 mt-3">
+                            <div>
+                                <i class="fas fa-users text-primary me-2"></i>
+                                <span class="fw-bold">{{ class.studentclassroom_set.count }}</span>
+                                <small class="text-muted">Students</small>
+                            </div>
+                            <div>
+                                <i class="fas fa-tasks text-warning me-2"></i>
+                                <span class="fw-bold">{{ class.total_assignments }}</span>
+                                <small class="text-muted">Assignments</small>
+                            </div>
                         </div>
                     </div>
                 </a>
             </div>
             {% empty %}
             <div class="col-12">
-                <div class="alert alert-info text-center" role="alert">
-                    <i class="fas fa-info-circle me-2"></i> You haven't created any classes yet. Click the button above to get started!
+                <div class="alert alert-info text-center py-5 rounded shadow-sm">
+                    <i class="fas fa-info-circle fa-2x mb-3 d-block text-primary"></i>
+                    <h5>No Classes Yet</h5>
+                    <p class="text-muted">Click <b>"New Class"</b> to get started!</p>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
+
+<!-- Notifications Modal -->
+<div class="modal fade" id="notificationsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 shadow-lg">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">Recent Notifications</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for activity in recent_activities %}
+                    <a href="{{ activity.url }}" class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
+                        <div class="d-flex align-items-center">
+                            {% if activity.type == 'student_joined' %}
+                                <i class="fas fa-user-plus text-success me-3"></i>
+                                <span>{{ activity.student_name }} joined {{ activity.class_name }}</span>
+                            {% elif activity.type == 'assignment_submitted' %}
+                                <i class="fas fa-file-alt text-primary me-3"></i>
+                                <span>{{ activity.student_name }} submitted an assignment in {{ activity.class_name }}</span>
+                            {% elif activity.type == 'quiz_submitted' %}
+                                <i class="fas fa-check-circle text-info me-3"></i>
+                                <span>{{ activity.student_name }} submitted a quiz in {{ activity.class_name }}</span>
+                            {% elif activity.type == 'poll_created' %}
+                                <i class="fas fa-poll text-warning me-3"></i>
+                                <span>New poll created in {{ activity.class_name }}</span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">{{ activity.timestamp|timesince }} ago</small>
+                    </a>
+                    {% empty %}
+                    <div class="list-group-item text-center py-5">
+                        <i class="fas fa-bell-slash fa-2x text-muted mb-2 d-block"></i>
+                        <p class="fw-semibold text-muted">No notifications available.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteClassModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Class?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">This action cannot be undone.</div>
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteClass">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let currentClassId = null;
+        document.querySelectorAll('.delete-class-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentClassId = btn.dataset.classId;
+                new bootstrap.Modal(document.getElementById('deleteClassModal')).show();
+            });
+        });
+
+        document.getElementById('confirmDeleteClass').addEventListener('click', () => {
+            if (currentClassId) {
+                fetch(`/teacher/class/${currentClassId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(r => r.json())
+                .then(d => d.success ? location.reload() : alert(d.message))
+                .catch(err => console.error(err));
+            }
+        });
+    });
+</script>
+
+<!-- Custom Styles -->
+<style>
+.text-gradient { background: linear-gradient(90deg, #2563eb, #9333ea); -webkit-background-clip: text; color: transparent; }
+.shadow-hover { transition: all 0.3s ease; }
+.shadow-hover:hover { transform: translateY(-6px); box-shadow: 0 12px 24px rgba(0,0,0,0.12); }
+
+/* --- Redesigned Stats Cards --- */
+.stat-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+}
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    opacity: 0.15;
+    z-index: 0;
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+.stat-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.85;
+    transition: transform 0.3s ease;
+}
+.stat-card:hover .stat-icon {
+    transform: scale(1.05);
+}
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.3rem;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.stat-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    opacity: 0.9;
+}
+
+/* Softer color palette */
+.bg-soft-blue { background: linear-gradient(135deg, #93c5fd, #3b82f6); }
+.bg-soft-green { background: linear-gradient(135deg, #86efac, #22c55e); }
+.bg-soft-purple { background: linear-gradient(135deg, #c4b5fd, #8b5cf6); }
+
+/* --- Class Cards --- */
+.class-card {
+    background: #fff; border-radius: 1rem; padding: 1.5rem; transition: all 0.3s ease; min-height: 220px;
+}
+.class-card:hover { transform: translateY(-6px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+.class-color-1 { border-color: #2563eb !important; }
+.class-color-2 { border-color: #16a34a !important; }
+.class-color-3 { border-color: #eab308 !important; }
+.class-color-4 { border-color: #ef4444 !important; }
+.class-color-5 { border-color: #8b5cf6 !important; }
+.class-color-6 { border-color: #db2777 !important; }
+</style>
 {% endblock %}

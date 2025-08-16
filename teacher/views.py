@@ -7,13 +7,91 @@ from .forms import TeacherProfileForm, SectionForm, ResourceForm, AssignmentForm
 from .models import Classroom, Section, Resource, Assignment, Poll, Quiz, QuizSubmission
 from student.models import StudentClassroom, StudentAssignmentSubmission
 import json
+from django.utils import timezone
 
 @login_required
 def dashboard(request):
     if not request.user.is_teacher:
         return redirect('student:dashboard')
+    
     classes = request.user.classes.all()
-    return render(request, 'teacher/dashboard.html', {'classes': classes})
+    
+    # Calculate total students across all classes
+    total_students = sum(classroom.studentclassroom_set.count() for classroom in classes)
+    
+    # Calculate total sections across all classes
+    total_sections = sum(classroom.sections.count() for classroom in classes)
+    
+    # Calculate notifications (e.g., new submissions, new students, active polls/quizzes)
+    notifications = 0
+    recent_activities = []
+    
+    # Gather recent activities (student joins, assignment submissions, quiz submissions, poll creation)
+    for classroom in classes:
+        # Student joins
+        student_joins = StudentClassroom.objects.filter(joined_class=classroom).order_by('-joined_at')[:5]
+        for join in student_joins:
+            recent_activities.append({
+                'type': 'student_joined',
+                'student_name': join.student.full_name,
+                'class_name': classroom.class_name,
+                'timestamp': join.joined_at,
+                'url': f"/teacher/class/{classroom.id}/"
+            })
+            notifications += 1
+        
+        # Assignment submissions
+        for section in classroom.sections.all():
+            for assignment in section.assignments.all():
+                submissions = StudentAssignmentSubmission.objects.filter(assignment=assignment).order_by('-submitted_at')[:5]
+                for submission in submissions:
+                    recent_activities.append({
+                        'type': 'assignment_submitted',
+                        'student_name': submission.student.full_name,
+                        'class_name': classroom.class_name,
+                        'timestamp': submission.submitted_at,
+                        'url': f"/teacher/class/{classroom.id}/section/{section.id}/assignment/{assignment.id}/submissions/"
+                    })
+                    notifications += 1
+            
+            # Quiz submissions
+            for quiz in section.quizzes.all():
+                quiz_submissions = QuizSubmission.objects.filter(quiz=quiz).order_by('-submitted_at')[:5]
+                for submission in quiz_submissions:
+                    recent_activities.append({
+                        'type': 'quiz_submitted',
+                        'student_name': submission.student.full_name,
+                        'class_name': classroom.class_name,
+                        'timestamp': submission.submitted_at,
+                        'url': f"/teacher/class/{classroom.id}/section/{section.id}/quiz/{quiz.id}/results/"
+                    })
+                    notifications += 1
+            
+            # Active polls
+            for poll in section.polls.filter(deadline__gt=timezone.now()):
+                recent_activities.append({
+                    'type': 'poll_created',
+                    'class_name': classroom.class_name,
+                    'timestamp': poll.created_at,
+                    'url': f"/teacher/class/{classroom.id}/section/{section.id}/poll/"
+                })
+                notifications += 1
+    
+    # Sort activities by timestamp (most recent first)
+    recent_activities.sort(key=lambda x: x['timestamp'], reverse=True)
+    recent_activities = recent_activities[:5]  # Limit to 5 activities
+    
+    # Calculate total assignments for each class
+    for class_obj in classes:
+        class_obj.total_assignments = sum(section.assignments.count() for section in class_obj.sections.all())
+    
+    return render(request, 'teacher/dashboard.html', {
+        'classes': classes,
+        'total_students': total_students,
+        'total_sections': total_sections,
+        'notifications': notifications,
+        'recent_activities': recent_activities
+    })
 
 @login_required
 def create_class(request):
@@ -351,4 +429,3 @@ def quiz_results(request, class_id, section_id, quiz_id):
         'quiz': quiz,
         'submissions': submissions,
     })
-
