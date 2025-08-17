@@ -1,98 +1,106 @@
 {% extends 'teacher/base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4 text-primary fw-bold">Create New Class</h2>
-    <form method="post" class="p-4 bg-white rounded shadow-sm">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="class_name" class="form-label fw-semibold">Class Name</label>
-            <input type="text" class="form-control" id="class_name" name="class_name" placeholder="Enter class name" required>
+<div class="container my-5">
+    <div class="card border-0 shadow-lg rounded-4 p-4">
+        <div class="card-body">
+            <h2 class="mb-4 fw-bold text-center text-primary">📚 Create New Class</h2>
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="class_name" class="form-label fw-semibold">Class Name</label>
+                    <input type="text" class="form-control" id="class_name" name="class_name" placeholder="Enter class name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="subject" class="form-label fw-semibold">Subject</label>
+                    <input type="text" class="form-control" id="subject" name="subject" placeholder="Enter subject" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="class_key" class="form-label fw-semibold">Class Key</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="class_key" name="class_key" readonly>
+                        <button class="btn btn-outline-primary" type="button" onclick="generateClassKey()">Generate</button>
+                    </div>
+                    <small class="form-text text-muted">Click to generate a 10-digit unique class key.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label fw-semibold">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="5" placeholder="Describe the class"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-outline-secondary px-4" onclick="window.history.back()">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">Add Class</button>
+                </div>
+            </form>
         </div>
-        <div class="mb-3">
-            <label for="subject" class="form-label fw-semibold">Subject</label>
-            <input type="text" class="form-control" id="subject" name="subject" placeholder="Enter subject" required>
-        </div>
-        <div class="mb-3">
-            <label for="class_key" class="form-label fw-semibold">Class Key</label>
-            <div class="input-group">
-                <input type="text" class="form-control" id="class_key" name="class_key" readonly value="">
-                <button class="btn btn-outline-primary" type="button" onclick="generateClassKey()">Generate Key</button>
-            </div>
-            <small class="form-text text-muted">Click to generate a 10-digit unique class key.</small>
-        </div>
-        <div class="mb-3">
-            <label for="description" class="form-label fw-semibold">Description</label>
-            <textarea class="form-control" id="description" name="description" rows="5" placeholder="Describe the class"></textarea>
-        </div>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Add Class</button>
-        </div>
-    </form>
+    </div>
 </div>
 
 <style>
-    .form-control, .form-control:focus {
-        border-color: var(--primary-blue);
-        box-shadow: none;
-        transition: border-color 0.3s ease;
+    .card {
+        background: #ffffff;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding: 10px 14px;
+        border: 1px solid #d1d5db;
     }
 
     .form-control:focus {
-        border-color: var(--secondary-blue);
-        box-shadow: 0 0 0 0.2rem rgba(56, 189, 248, 0.25);
+        border-color: #2563eb;
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
     }
 
     .form-label {
-        color: var(--text-color);
+        color: #374151;
     }
 
-    .btn-primary, .btn-outline-primary {
-        background-color: var(--primary-blue);
-        border-color: var(--primary-blue);
-        transition: all 0.3s ease;
+    .btn-primary {
+        background: #2563eb;
+        border: none;
+        border-radius: 10px;
+        transition: 0.3s;
     }
 
-    .btn-primary:hover, .btn-outline-primary:hover {
-        background-color: var(--secondary-blue);
-        border-color: var(--secondary-blue);
+    .btn-primary:hover {
+        background: #1e40af;
         transform: translateY(-2px);
     }
 
     .btn-outline-primary {
-        color: var(--primary-blue);
-        background-color: transparent;
+        border-radius: 10px;
+        border: 1px solid #2563eb;
+        color: #2563eb;
+        transition: 0.3s;
     }
 
     .btn-outline-primary:hover {
-        color: white;
+        background: #2563eb;
+        color: #fff;
     }
 
     .btn-outline-secondary {
-        border-color: var(--text-color);
-        color: var(--text-color);
-        transition: all 0.3s ease;
+        border-radius: 10px;
+        border: 1px solid #6b7280;
+        color: #6b7280;
+        transition: 0.3s;
     }
 
     .btn-outline-secondary:hover {
-        background-color: var(--light-blue);
-        border-color: var(--secondary-blue);
-        color: var(--primary-blue);
-    }
-
-    .shadow-sm {
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    .form-text {
-        color: var(--text-color);
+        background: #f3f4f6;
+        color: #111827;
     }
 
     @media (max-width: 576px) {
         .d-flex {
             flex-direction: column;
-            gap: 1rem;
+            gap: 12px;
         }
         .btn {
             width: 100%;
@@ -110,7 +118,7 @@
         document.getElementById('class_key').value = key;
     }
 
-    // Generate key on page load
+    // Auto generate key when page loads
     window.onload = generateClassKey;
 </script>
 {% endblock %}
