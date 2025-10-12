@@ -1,0 +1,64 @@
+.card {
+    background: #ffffff;
+}
+
+.form-control {
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+}
+
+.form-control:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.form-label {
+    color: #374151;
+}
+
+.btn-primary {
+    background: #2563eb;
+    border: none;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    background: #1e40af;
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    border-radius: 10px;
+    border: 1px solid #2563eb;
+    color: #2563eb;
+    transition: 0.3s;
+}
+
+.btn-outline-primary:hover {
+    background: #2563eb;
+    color: #fff;
+}
+
+.btn-outline-secondary {
+    border-radius: 10px;
+    border: 1px solid #6b7280;
+    color: #6b7280;
+    transition: 0.3s;
+}
+
+.btn-outline-secondary:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+@media (max-width: 576px) {
+    .d-flex {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .btn {
+        width: 100%;
+    }
+}
